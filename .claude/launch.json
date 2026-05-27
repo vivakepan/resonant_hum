@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "static",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-u", "-c", "import os, http.server, socketserver; port = int(os.environ.get('PORT', '0')); socketserver.TCPServer.allow_reuse_address = True; httpd = socketserver.TCPServer(('', port), http.server.SimpleHTTPRequestHandler); print('listening', httpd.server_address[1], flush=True); httpd.serve_forever()"],
+      "autoPort": true
+    }
+  ]
+}

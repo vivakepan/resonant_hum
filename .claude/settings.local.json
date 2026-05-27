@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node --input-type=module -e ' *)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 ingest.py test_sessions.jsonl)",
+      "Bash(python3 homology.py)",
+      "Bash(python3 neti_neti.py)",
+      "Bash(sqlite3 graph.db \"SELECT status, COUNT\\(*\\) FROM homology_candidate GROUP BY status;\")",
+      "Bash(python3 articulate.py)",
+      "Bash(sqlite3 graph.db \"SELECT status, COUNT\\(*\\) FROM homology_candidate GROUP BY status; SELECT '---'; SELECT type, COUNT\\(*\\) cnt, ROUND\\(AVG\\(resonance_depth\\),1\\) depth FROM morphism GROUP BY type ORDER BY cnt DESC;\")",
+      "Bash(python3 -c \"import json; d=json.load\\(open\\('articulation.json'\\)\\); print\\('items:', len\\(d['items']\\)\\); [print\\(i['recognition'][:70], '|', i['warrant']\\) for i in d['items'][:3]]\")"
+    ]
+  }
+}

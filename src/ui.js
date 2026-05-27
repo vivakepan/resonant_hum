@@ -16,6 +16,13 @@ export function createZoneBars() {
   return zones.map(z => {
     const row = document.createElement('div');
     row.className = 'zone-row';
+    // AIN-RS-012 / A-008: honest-disclosure notes (e.g. heart zone caveat)
+    // and multi-modal mode summaries surface on hover.
+    const modeNote = z.modes
+      ? `Modes: ${z.modes.map(m => m.f + ' Hz (' + m.evidence.split('—')[0].trim() + ')').join('; ')}`
+      : '';
+    const tip = [z.note, modeNote].filter(Boolean).join('  •  ');
+    if (tip) row.title = tip;
     row.innerHTML = `
       <span class="dot" style="background:${z.color};color:${z.color}"></span>
       <div>
@@ -40,10 +47,11 @@ export function updateZoneBars(rowEls, amps) {
 
 
 // ─── Control wiring ────────────────────────────────────────────
-// Takes a `state` object with: driveF, sweeping, sweepDir, timeScale.
-// Mutates it directly (simple shared state for a single-page app).
+// Takes a `state` object with: drivers[], sweeping, sweepDir, timeScale.
+// Mutates state.drivers[0] (the primary internal driver — the slider).
+// External drivers (uploaded song peaks) get appended elsewhere.
 
-export function wireControls(state) {
+export function wireControls(state, audio, breath) {
   const freqInput = document.getElementById('freq');
   const freqVal   = document.getElementById('freqVal');
   const noteName  = document.getElementById('noteName');
@@ -54,7 +62,7 @@ export function wireControls(state) {
   }
 
   function setDrive(f, activeBtn) {
-    state.driveF = f;
+    state.drivers[0].f = f;
     freqInput.value = f;
     freqVal.textContent = f.toFixed ? f.toFixed(1) : f;
     noteName.textContent = freqToNote(f);
@@ -99,15 +107,153 @@ export function wireControls(state) {
     speedBtn.innerHTML = `<span class="lbl">RATE</span>${state.timeScale}×`;
   });
 
-  // Initialize note display
-  noteName.textContent = freqToNote(state.driveF);
+  // Initialize note display from the primary driver
+  noteName.textContent = freqToNote(state.drivers[0].f);
 
-  // Return a handle for the sweep update (called each frame)
+  // ── §5a song / external-source controls ──
+  // The audio engine pulls peaks each frame; this UI just chooses the file,
+  // gates play/pause, and exposes the externalBalance + K parameters.
+  if (audio) wireSongControls(state, audio);
+
+  // ── §5b breath controls ──
+  const breathUpdate = breath ? wireBreathControls(breath, state) : null;
+
+  // Return a handle for per-frame updates
   return {
     updateSweepDisplay() {
-      freqInput.value = state.driveF;
-      freqVal.textContent = state.driveF.toFixed(1);
-      noteName.textContent = freqToNote(state.driveF);
+      const f = state.drivers[0].f;
+      freqInput.value = f;
+      freqVal.textContent = f.toFixed(1);
+      noteName.textContent = freqToNote(f);
+    },
+    updateBreathDisplay(vt) {
+      if (breathUpdate) breathUpdate(vt);
+    },
+  };
+}
+
+
+// ─── Song / external source wiring (§5a) ───────────────────────
+
+function wireSongControls(state, audio) {
+  const fileInput   = document.getElementById('songFile');
+  const fileLabel   = document.querySelector('label[for="songFile"]');
+  const playBtn     = document.getElementById('songPlay');
+  const stopBtn     = document.getElementById('songStop');
+  const fieldBtn    = document.getElementById('fieldToggle');
+  const balInput    = document.getElementById('songBalance');
+  const balVal      = document.getElementById('songBalanceVal');
+  const kInput      = document.getElementById('songK');
+  const kVal        = document.getElementById('songKVal');
+  const status      = document.getElementById('songStatus');
+
+  fileInput.addEventListener('change', async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    try {
+      const el = await audio.load(file);
+      fileLabel.textContent = file.name.length > 28 ? file.name.slice(0, 25) + '…' : file.name;
+      fileLabel.classList.add('loaded');
+      status.textContent = `Loaded · ${file.name}`;
+      status.classList.add('loaded');
+      playBtn.disabled = false;
+      stopBtn.disabled = false;
+      el.addEventListener('ended', () => {
+        audio.pause();
+        playBtn.textContent = '▶ PLAY';
+        playBtn.classList.remove('on');
+      });
+    } catch (err) {
+      status.textContent = `Failed to load: ${err.message}`;
     }
+  });
+
+  playBtn.addEventListener('click', () => {
+    if (audio.isPlaying()) {
+      audio.pause();
+      playBtn.textContent = '▶ PLAY';
+      playBtn.classList.remove('on');
+    } else {
+      audio.play();
+      playBtn.textContent = '❚❚ PAUSE';
+      playBtn.classList.add('on');
+    }
+  });
+
+  stopBtn.addEventListener('click', () => {
+    audio.stop();
+    playBtn.textContent = '▶ PLAY';
+    playBtn.classList.remove('on');
+    state.externalDrivers = [];
+  });
+
+  fieldBtn.addEventListener('click', () => {
+    state.fieldEnabled = !state.fieldEnabled;
+    fieldBtn.classList.toggle('on', state.fieldEnabled);
+  });
+
+  balInput.addEventListener('input', e => {
+    state.externalBalance = parseFloat(e.target.value);
+    balVal.textContent = Math.round(state.externalBalance * 100) + '%';
+  });
+
+  kInput.addEventListener('input', e => {
+    const k = parseInt(e.target.value, 10);
+    audio.setK(k);
+    kVal.textContent = String(k);
+  });
+}
+
+
+// ─── Breath wiring (§5b) ───────────────────────────────────────
+
+function wireBreathControls(breath, state) {
+  const toggleBtn  = document.getElementById('breathToggle');
+  const modeBtn    = document.getElementById('breathMode');
+  const periodIn   = document.getElementById('breathPeriod');
+  const periodVal  = document.getElementById('breathPeriodVal');
+  const bar        = document.getElementById('breathBar');
+
+  // Mode cycling: synth → tap → synth. Mic deferred per plan §5b (privacy + complexity).
+  const modes = ['sine', 'tap'];
+  const modeLabels = { sine: 'MODE · SYNTH', tap: 'MODE · TAP' };
+  let modeIdx = 0;
+
+  toggleBtn.addEventListener('click', () => {
+    const next = !breath.enabled;
+    breath.setEnabled(next);
+    toggleBtn.classList.toggle('on', next);
+  });
+
+  modeBtn.addEventListener('click', () => {
+    modeIdx = (modeIdx + 1) % modes.length;
+    const m = modes[modeIdx];
+    breath.setMode(m);
+    modeBtn.textContent = modeLabels[m];
+  });
+
+  periodIn.addEventListener('input', e => {
+    const s = parseFloat(e.target.value);
+    breath.setPeriodSeconds(s);
+    periodVal.textContent = s.toFixed(1) + 's';
+  });
+
+  // Tap-to-breathe: spacebar held = inhale, released = exhale. Only active
+  // when mode === 'tap'; otherwise spacebar is left alone for the browser.
+  window.addEventListener('keydown', (e) => {
+    if (breath.mode !== 'tap' || e.code !== 'Space' || e.repeat) return;
+    e.preventDefault();
+    breath.onTapDown(state.vt);
+  });
+  window.addEventListener('keyup', (e) => {
+    if (breath.mode !== 'tap' || e.code !== 'Space') return;
+    e.preventDefault();
+    breath.onTapUp(state.vt);
+  });
+
+  // Per-frame display updater
+  return function update(vt) {
+    const env = breath.envelope(vt);
+    bar.style.width = (env * 100).toFixed(1) + '%';
   };
 }
