@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Resonant Singer — A Visual Tuner</title>
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+<div class="grain"></div>
+<div class="frame">
+
+  <header>
+    <h1>The Resonant Singer · <em>a study in coupled oscillators</em></h1>
+    <div class="meta">SYSTEM · <b id="sysState">SCANNING</b></div>
+  </header>
+
+  <nav class="left-rail">
+    <h3>off-resonance</h3>
+
+    <button class="anti-btn" data-f="78">
+      <span class="label-main">SUB · 78</span>
+      <span class="label-sub">below all fundamentals*</span>
+    </button>
+
+    <button class="anti-btn ar" data-f="147">
+      <span class="label-main">◊ NULL · 147</span>
+      <span class="label-sub">chest ⇌ trachea — √(120 × 180)</span>
+    </button>
+
+    <button class="anti-btn ar" data-f="355">
+      <span class="label-main">◊ DEAD · 355</span>
+      <span class="label-sub">pharynx ⇌ mouth — √(300 × 420)</span>
+    </button>
+
+    <button class="anti-btn ar" data-f="467">
+      <span class="label-main">◊ COLD · 467</span>
+      <span class="label-sub">mouth ⇌ skull — √(420 × 520)</span>
+    </button>
+
+    <button class="anti-btn ar" data-f="628">
+      <span class="label-main">◊ MUTE · 628</span>
+      <span class="label-sub">nasal ⇌ eyes — √(580 × 680)</span>
+    </button>
+
+    <button class="anti-btn" data-f="845">
+      <span class="label-main">SUPRA · 845</span>
+      <span class="label-sub">above all fundamentals</span>
+    </button>
+
+    <div class="rail-note">
+      <b>SUB / SUPRA:</b> below / above all zone fundamentals. *Note: SUB still excites mid zones faintly through its upper harmonics — truly dead frequencies are rare in a 10-zone harmonic system.<br><br>
+      <span style="color:#b48cff">◊ marked:</span> anti-resonance notches at the geometric mean of adjacent mode pairs. Two coupled oscillators interfere out-of-phase, <em>canceling</em> response below even the baseline.
+    </div>
+  </nav>
+
+  <main>
+    <canvas id="c"></canvas>
+    <div class="resonance-badge" id="badge">OFF-RESONANCE</div>
+  </main>
+
+  <aside>
+    <h2>Resonant structures</h2>
+    <div id="zones"></div>
+
+    <div class="panel">
+      <h2>What you're looking at</h2>
+      <p><em>Driver:</em> the vocal folds (the flaps in the larynx) chop the airstream into a buzz at the fundamental frequency. That buzz is rich in harmonics.</p>
+      <p><em>Resonators:</em> each cavity and bony structure has its own preferred frequency. They respond strongly when the fundamental — or one of its harmonics — lands near their natural mode.</p>
+      <p><em>Coupling:</em> the vagus nerve (green path winding through the chest) and the body's tissues mechanically and neurologically link these zones. Even sub-threshold vibration in one zone biases the others — the <em>"tuning"</em> case.</p>
+      <p><em>Whole-system mode:</em> at certain fundamentals, multiple resonators light up simultaneously through harmonic stacking. That's the singer's experience of the note "ringing through everything."</p>
+      <p><em>Anti-resonance:</em> at the geometric mean between adjacent zone pairs (the ◊-marked buttons on the left), coupled oscillators interfere destructively. Response drops <em>below</em> baseline — not silence, but active cancellation.</p>
+    </div>
+  </aside>
+
+  <footer>
+    <div class="freq-readout">
+      <span id="freqVal">220</span><span class="unit">Hz</span>
+      <span class="note" id="noteName">A3</span>
+    </div>
+    <input type="range" id="freq" min="70" max="900" value="220" step="0.5">
+    <div class="presets">
+      <button class="preset-btn" data-f="98">CHEST · 98</button>
+      <button class="preset-btn" data-f="220">A3 · 220</button>
+      <button class="preset-btn" data-f="440">A4 · 440</button>
+      <button class="preset-btn" data-f="587">SKULL · 587</button>
+      <button class="preset-btn" data-f="261.6">SWEET · 262</button>
+      <button class="preset-btn heart-btn" data-f="105">♥ HEART · 105</button>
+    </div>
+    <button class="speed-btn" id="speed"><span class="lbl">RATE</span>1×</button>
+    <button class="toggle" id="sweep">SWEEP</button>
+  </footer>
+
+</div>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
