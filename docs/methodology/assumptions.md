@@ -30,13 +30,13 @@ Status legend: **ACTIVE** (in force, untested) · **REFINED** (sharpened from ea
 - **Blast radius:** Whether harmonic resonance at upper zones from a low driver is reasonable.
 - **Reference:** [src/physics.js:zoneResponse](../../src/physics.js).
 
-## A-004 — Euclidean canvas distance approximates anatomical coupling
+## A-004 — Anatomical adjacency approximates inter-zone coupling
 
-- **Statement:** Inter-zone coupling strength falls off as Gaussian of Euclidean distance in normalized canvas coordinates.
-- **Status:** ACTIVE — flagged for replacement.
-- **Falsification:** Coupling kernel is not anatomically grounded — canvas pixels are not bone-conduction paths or air-cavity adjacencies. Replacement with anatomical adjacency graph is in roadmap (AIN-RS-002).
-- **Blast radius:** Which zones co-activate. The "whole-system resonance" emergence.
-- **Reference:** [src/physics.js:applyCoupling](../../src/physics.js), AIN-RS-002.
+- **Statement:** Inter-zone coupling follows a named adjacency graph (air / tissue / bone pathways) with subjective edge weights, not Euclidean canvas distance.
+- **Status:** REFINED (replaced pixel-distance kernel per AIN-RS-002).
+- **Falsification:** Empirical or simulation evidence that the chosen topology systematically mis-predicts which zones co-activate for a given drive.
+- **Blast radius:** Whole-system resonance emergence, preset phenomenology.
+- **Reference:** [src/physics.js:adjacency](../../src/physics.js), AIN-RS-002.
 
 ## A-005 — Anti-resonance notches at geometric-mean frequencies
 
@@ -46,13 +46,13 @@ Status legend: **ACTIVE** (in force, untested) · **REFINED** (sharpened from ea
 - **Blast radius:** Four hand-picked notches; the ◊ buttons.
 - **Reference:** [src/physics.js:antiResonances](../../src/physics.js), AIN-RS-004.
 
-## A-006 — Time-independent physics is sufficient
+## A-006 — First-order envelopes suffice for temporal phenomenology
 
-- **Statement:** Zone response can be computed as a pure function of (zone, driver) without time. Visual oscillation is decorative.
-- **Status:** ACTIVE — flagged for replacement.
-- **Falsification:** Two-source interference and breath modulation both require time-dependent state to render correctly (buildup, beats, decay). Refactor in roadmap as AIN-RS-006.
-- **Blast radius:** No beats, no buildup, no phase-lock dynamics. Replaces with driven-damped-oscillator ODE per zone.
-- **Reference:** [src/main.js](../../src/main.js), AIN-RS-006.
+- **Statement:** Per-zone low-pass tracking toward steady-state `zoneResponse` targets (Q-dependent tau) is enough for buildup/decay visuals; full driven-damped ODE per mode is optional.
+- **Status:** REFINED (partial — envelopes shipped; ODE deferred).
+- **Falsification:** Users or verification show beats/buildup require per-zone phase state beyond field-layer superposition.
+- **Blast radius:** Sweep feel, multi-driver beating, breath coupling.
+- **Reference:** [src/main.js:zoneAmpsDyn](../../src/main.js), AIN-RS-006.
 
 ## A-007 — System badge thresholds reflect meaningful state transitions
 
@@ -80,11 +80,27 @@ Status legend: **ACTIVE** (in force, untested) · **REFINED** (sharpened from ea
 
 ## A-010 — Source positions in the field model are visualization geometry, not anatomy
 
-- **Statement (when interference field lands):** The internal source at the larynx position is anatomically motivated (the vocal folds are the actual phonation source). The external source at the top of the skull is *visualization geometry chosen for legibility of the interference pattern*, NOT a model of how song reaches the body. In reality, a song arrives as air pressure at both ears.
-- **Status:** ACTIVE (anticipatory — registered in advance of §5a landing).
-- **Falsification:** N/A — this is a stated framing, not an empirical claim. The point of registering it is so that future contributors don't mistake the visualization for acoustics.
-- **Blast radius:** Field rendering, UI tooltip text. Anywhere users see "source position."
-- **Reference:** §12.2 of the refinement roadmap.
+- **Statement:** Internal source at larynx is anatomically motivated. External source at skull-top is *visualization geometry for legible interference*, NOT how song reaches the body (air pressure at both ears).
+- **Status:** REFINED — shipped with UI tooltip and [INTERFERENCE_MODE_DESIGN.md](../INTERFERENCE_MODE_DESIGN.md).
+- **Falsification:** N/A — stated framing. Failure mode is users misreading the viz as measurement.
+- **Blast radius:** `field.js`, song panel, documentation.
+- **Reference:** [src/field.js](../../src/field.js), AIN-RS-013.
+
+## A-011 — FFT peak tracking suffices for quiet hum (mic)
+
+- **Statement:** Dominant-bin FFT peak on `AnalyserNode` (not YIN worklet) is adequate for monophonic hum in a quiet room.
+- **Status:** ACTIVE.
+- **Falsification:** Systematic octave errors or missed fundamentals in verification that YIN would fix without new privacy surface.
+- **Blast radius:** Mic LISTEN path in [src/audio.js](../../src/audio.js).
+- **Reference:** [AUDIO_PIPELINE_DESIGN.md](../AUDIO_PIPELINE_DESIGN.md).
+
+## A-012 — Session export scalars are non-invertible
+
+- **Statement:** Opt-in JSONL session features (frequencies, sysAmp, activeCount, ar flags) carry no reconstructable speech content.
+- **Status:** ACTIVE.
+- **Falsification:** Any addition of MFCC/mel/spectrogram uploads to aggregate pipelines.
+- **Blast radius:** [src/sessions.js](../../src/sessions.js), journal-noticer, graph ingest.
+- **Reference:** [JOURNAL_NOTICER_DESIGN.md](../JOURNAL_NOTICER_DESIGN.md).
 
 ---
 

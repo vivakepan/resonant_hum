@@ -325,6 +325,56 @@ input[type="range"]::-moz-range-thumb {
 .resonance-badge.anti { color: var(--violet); border-color: var(--violet); box-shadow: 0 0 18px rgba(180,140,255,0.45); background: rgba(35,25,55,0.5); }
 
 
+/* ─── View modes (main canvas) ───────────────────────────────── */
+
+.view-strip {
+  position: absolute; bottom: 52px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 4px; z-index: 5;
+}
+.view-btn {
+  background: rgba(7,9,12,0.75); border: 1px solid var(--line); color: var(--dim);
+  padding: 4px 8px; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+  cursor: pointer; font-family: 'JetBrains Mono';
+}
+.view-btn.active { color: var(--teal); border-color: var(--teal); }
+.view-caption {
+  position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+  font-size: 9px; color: var(--dim); font-style: italic; z-index: 5;
+  font-family: 'Cormorant Garamond', serif;
+}
+.drive-chips {
+  position: absolute; top: 52px; left: 28px; display: flex; gap: 4px; flex-wrap: wrap; z-index: 5;
+}
+.drive-chip {
+  font-size: 9px; padding: 2px 6px; border: 1px solid var(--line); color: var(--dim);
+  letter-spacing: 0.08em;
+}
+.drive-chip.primary { color: var(--amber); border-color: var(--amber); }
+
+.audio-panel {
+  position: absolute; bottom: 8px; left: 8px; z-index: 5;
+  background: rgba(7,9,12,0.85); border: 1px solid var(--line); padding: 6px 8px;
+}
+.audio-panel .row { display: flex; gap: 4px; }
+.audio-btn {
+  background: transparent; border: 1px solid var(--line); color: var(--dim);
+  padding: 5px 8px; font-size: 9px; cursor: pointer; font-family: 'JetBrains Mono';
+}
+.audio-btn.on { color: var(--bg); background: var(--teal); border-color: var(--teal); }
+.audio-btn.denied { color: #ff6b6b; border-color: rgba(255,107,107,0.5); }
+.audio-meta { font-size: 8px; color: var(--dim); margin-top: 4px; max-width: 200px; }
+
+.env-btn, .multi-toggle, .clear-btn {
+  background: transparent; border: 1px solid var(--line); color: var(--dim);
+  padding: 8px 10px; font-family: 'JetBrains Mono'; font-size: 10px;
+  letter-spacing: 0.1em; cursor: pointer;
+}
+.env-btn.on, .multi-toggle.on { color: var(--bg); background: var(--cyan); border-color: var(--cyan); }
+.clear-btn { padding: 8px 12px; color: var(--rose); }
+
+.panel-note { font-size: 10px; color: var(--dim); margin: 0 0 8px; }
+
+
 /* ─── Responsive ─────────────────────────────────────────────── */
 
 @media (max-width: 780px) {

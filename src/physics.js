@@ -56,6 +56,9 @@ export const zones = [
   { id: 'ears',     name: 'Inner ear',        nx: 0.42, ny: 0.26, r: 11,  freq: 760, Q: 0.80, color: '#b48cff' },
 ];
 
+/** Canonical zone ids for session export / graph ingest (amps[] index order). */
+export const ZONE_IDS = zones.map(z => z.id);
+
 
 // ─── Anti-resonance pairs ──────────────────────────────────────
 // For each adjacent pair of zones (sorted by natural frequency),

@@ -25,8 +25,8 @@ The four-tier framework is from the parent methodology document (Methodology v1.
 - **Invariant preserved:** The entire superposition algebra. Two sinusoidal sources at the same frequency produce static node/antinode geometry; close-but-different frequencies produce beating envelopes at the difference frequency.
 - **What transfers:** Compositional structure — `A_total = A_1·f_1(r_1, t) + A_2·f_2(r_2, t)`. All inferences about interference geometry, beats, and standing patterns apply directly.
 - **What does NOT transfer:** The physical context. A song reaching a body via air pressure does not arrive at a single skull-top point. The source geometry is *visualization choice*, not acoustic claim (AIN-RS-013).
-- **Predictive track record:** Pending §5a landing. Verification: a sine WAV at chest frequency + internal slider at the first harmonic should show a beat pattern at the difference frequency.
-- **Reference:** [docs/INTERFERENCE_MODE_DESIGN.md](../INTERFERENCE_MODE_DESIGN.md), §5a of the refinement roadmap.
+- **Predictive track record:** **SHIPPED** in `field.js`. Verification: sine WAV + internal harmonic → beat pattern ([VERIFICATION.md](../VERIFICATION.md)).
+- **Reference:** [INTERFERENCE_MODE_DESIGN.md](../INTERFERENCE_MODE_DESIGN.md), [src/field.js](../../src/field.js).
 
 ## IM-003 — Vocal tract acoustic tube model → zone formant frequencies
 
@@ -43,12 +43,12 @@ The four-tier framework is from the parent methodology document (Methodology v1.
 
 - **Source domain:** Classical mechanics — `ẍ + 2γẋ + ω₀²x = F(t)`. Drive at resonance: amplitude builds over Q/ω₀ time. Drive off-resonance: transient die-down to forced response.
 - **Target domain:** Per-zone state after the AIN-RS-006 refactor.
-- **Tier:** **FUNCTORIAL** (when implemented).
-- **Invariant preserved:** Buildup time, decay time, beating between two close drivers, phase-lag at resonance.
-- **What transfers:** Time-domain dynamics — buildup, sustain, decay envelopes. Verifiable: sustained drive at preset frequency must show monotonic rise to plateau.
-- **What does NOT transfer:** Real biological tissue is nonlinear at high amplitudes; the ODE is linear by assumption.
-- **Predictive track record:** Pending AIN-RS-006 landing.
-- **Reference:** §3 AIN-RS-006 of the refinement roadmap.
+- **Tier:** **HOMOLOGY** (envelope partial; full ODE staged).
+- **Invariant preserved:** Buildup time, decay time toward steady-state response.
+- **What transfers:** Monotonic rise/plateau on sustained preset; decay on release.
+- **What does NOT transfer:** Full phase-lock and inter-driver beats in zones (field layer handles beats).
+- **Predictive track record:** Confirmed for envelope; ODE promotion optional.
+- **Reference:** [src/main.js](../../src/main.js), AIN-RS-006.
 
 ## IM-005 — Standing waves on a string → zone phase-lock under sustained drive
 
@@ -69,8 +69,8 @@ The four-tier framework is from the parent methodology document (Methodology v1.
 - **Invariant preserved:** Deferred-closure discipline — recognition statements should be accompanied by *revealed openings* (what's still not known), not just outputs.
 - **What transfers:** The Presence Engine L2 "presence filter" structure (seven-step deferral pass) and L3 articulation layer (recognition + revealed opening). Applies directly to how the badge expresses system state.
 - **What does NOT transfer:** Resonant Singer is a much smaller, bounded domain than LLM reasoning. We don't need the full topos-theoretic machinery — just the discipline.
-- **Predictive track record:** Untested. Will land with §6.4 articulation surface.
-- **Reference:** §6.4 of the refinement roadmap.
+- **Predictive track record:** **PARTIAL** — `articulate.py` + optional `articulation.json` loader; badge tooltip only, passive.
+- **Reference:** [tools/graph_engine/articulate.py](../../tools/graph_engine/articulate.py), [src/articulation.js](../../src/articulation.js).
 
 ## IM-007 — Active Inference (Friston) → breath-modulated attention to resonance band
 

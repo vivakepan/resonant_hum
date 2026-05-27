@@ -1,14 +1,29 @@
 # Engine Roadmap — Staged Capability Map
 
-**Status:** Forward-looking. Decision criteria for whether/when to graduate the artifact from the browser to a game engine.
+**Status:** **STAGED — in-project capability tier** · [README.md](../README.md)  
+**Current tier:** Canvas 2D browser app ([ARCHITECTURE.md](ARCHITECTURE.md)) — field, breath, views, mic/file **SHIPPED**  
+**This doc:** when and why to graduate to Three.js / Unity / UE5
+
+---
+
+## Relationship to v2 (shipped browser)
+
+| v2 (now) | Engine tier (staged) |
+|----------|----------------------|
+| 2D interference field (`field.js`) | Volumetric Niagara / VFX Graph |
+| Five view *stances* (`views.js`) | Anatomical layers / MetaHuman |
+| FFT mic + file (`audio.js`) | MetaSounds, binaural, VR mic |
+| Portable `index.html` / `dist/` | Multi-GB download or Pixel Streaming |
+
+The engine path is **part of project scope**, not rejected. The browser artifact remains the **front door** for one-click distribution.
 
 ---
 
 ## The governing principle
 
-A game engine is worth it **if and only if the third dimension, real-time field simulation, or embodiment are doing conceptual work.** If the goal is only "make the current artifact glossier," an engine is overkill and a net loss (it sacrifices the browser's one-click distribution). Each tier below is justified by a capability the previous tier *cannot reach* — that's the discipline that keeps an engine migration from being a vanity rebuild.
+A game engine is worth it **if and only if the third dimension, real-time field simulation, or embodiment are doing conceptual work.** If the goal is only "make the current artifact glossier," an engine is overkill. Each tier below is justified by a capability the previous tier *cannot reach*.
 
-The interference idea (see [INTERFERENCE_MODE_DESIGN.md](INTERFERENCE_MODE_DESIGN.md)) is what first justifies 3D: interference in a volume produces standing-wave *surfaces*, not just points, and you can fly the camera through them.
+2D interference is **shipped** ([INTERFERENCE_MODE_DESIGN.md](INTERFERENCE_MODE_DESIGN.md)). 3D justifies **nodal surfaces** you can fly through — not replacing the 2D proof.
 
 ---
 
@@ -82,8 +97,8 @@ Games are systems for exploring possibility spaces.
 
 ## Recommended progression
 
-1. **2D interference** in the current web artifact — prove song-source + hum-source + overlap is legible and interesting. Cheap, keeps distribution.
-2. **3D interference in Three.js** — same shareability, adds volumetric standing waves and fly-through. The first real "field" version.
-3. **UE5** — only when MetaHuman anatomy, MetaSounds audio, spatialized binaural, or VR/haptic embodiment become the actual goal. Research-instrument tier, downloaded not clicked.
+1. **2D interference** — **DONE** in `src/field.js`. Maintain legibility and honesty disclaimers.
+2. **3D interference in Three.js** — same shareability, volumetric standing waves. First volumetric "field" version.
+3. **UE5** — MetaHuman, MetaSounds, spatialized binaural, VR/haptics when embodiment is the goal. Research-instrument tier.
 
-Each step is justified by a capability the previous step couldn't reach. That criterion is the whole discipline.
+Each step is justified by a capability the previous step couldn't reach.

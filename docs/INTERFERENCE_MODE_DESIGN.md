@@ -1,67 +1,87 @@
 # Interference Mode — Design Document
 
-**Status:** Designed, not implemented. Captures the concept so it isn't lost.
+**Status:** **SHIPPED** (Canvas 2D) · [README.md](../README.md)  
+**Implements:** [`src/field.js`](../src/field.js), [`src/main.js`](../src/main.js), song panel in [`index.html`](../index.html)  
+**Architecture:** [ARCHITECTURE.md](ARCHITECTURE.md) · **3D tier:** [ENGINE_ROADMAP.md](ENGINE_ROADMAP.md) (STAGED)
+
+This document is the *design rationale*. Behavior lives in code; update this file when the model changes.
 
 ---
 
 ## The idea in one sentence
 
-Two wave sources meet inside the body — an **external** source (a song, entering from the skull/ears) and an **internal** source (the hum, rising from the larynx/chest) — counter-propagating, and the interesting physics lives in their **overlap.**
+Two wave sources meet inside the body — an **external** source (song peaks, visualized entering from skull-top) and an **internal** source (hum/slider, rising from the larynx) — and the interesting physics lives in their **overlap.**
 
 ---
 
 ## Why it completes the project
 
-Everything built so far is **single-source**: one drive frequency goes in, zones respond. Interference mode introduces a **second source travelling in a different direction**, which moves the subject from *response* to *interference*. This is what lets the artifact finally visualize:
+Single-source mode: one drive frequency, zones respond. The field layer adds a **second source** and spatial superposition — moving from *response* to *interference*. This visualizes:
 
-- **Resonance** — the two sources excite the same (or harmonically related) zones; the overlap brightens (constructive).
-- **Non-resonance** — the two sources light different zones with little overlap; two separate active regions that don't interact. (Most combinations look like this. That honesty is good.)
-- **Harmonizing** — the middle case: hum and song in simple ratio (octave, fifth, third) produce a *stable standing-wave pattern* with fixed bright/dark bands rather than chaotic flicker. The visual signature of consonance.
-- **External vs internal effects** — directionality pays off: the song's energy penetrates inward (top-down, attenuating with depth) while the hum radiates outward (bottom-up). Where they meet is the "felt" zone — roughly where singers report *placement.*
-
-Critically, this is **the visualization of the essay's "being sung through" protocol.** Step Two of the practice is: put on a song, hum silently, let the song happen to the body. Interference mode shows exactly that — song in from outside, hum up from inside, body as the medium where they meet. The artifact and the contemplative practice would finally depict the same thing.
+- **Resonance** — sources excite shared zones; overlap brightens.
+- **Non-resonance** — sources light different regions with little overlap.
+- **Harmonizing** — simple frequency ratios → stable standing patterns (consonance).
+- **Essay protocol** — Step Two (“being sung through”): song from outside, hum from inside, body as medium.
 
 ---
 
-## The directionality (the clever part)
+## Directionality (visualization choice)
 
-- **Song** enters from the **skull / ears** (top — the external world coming in).
-- **Hum** originates from the **larynx / chest** (the body's own source, going out).
-- They **counter-propagate.** Where they meet and how they phase-relate is the visual.
+- **Song** — skull-top (legibility of meeting region inside zone array).
+- **Hum** — larynx (actual phonation source).
 
-This maps onto real acoustics: counter-propagating waves *do* produce standing-wave patterns with fixed nodes and antinodes. The visualization would illustrate a true phenomenon, not invent one.
-
----
-
-## Underspecified decision: what does "the song's waves" mean as input?
-
-A song is a dense, time-varying spectrum, not a single frequency. Three handling strategies, increasing fidelity:
-
-1. **Dominant-pitch tracking** *(recommended default)* — extract the strongest frequency each moment (melody/bass), treat as the external drive. Simplest, cleanest, slightly lossy. The song becomes a moving point on the same spectrum the hum lives on.
-2. **Multi-peak** — extract top-N spectral peaks (the FFT peak-extraction already prototyped), treat each as a separate external source. Richer, busier, closer to truth.
-3. **Full-spectrum field** — the whole FFT magnitude array as a broadband field washing over the body. Most faithful, hardest to make legible, risks looking like noise.
-
-**Recommendation: (1) or (2).** The point of the piece is *legibility* — a singer seeing the relationship between their hum and the song. Full-spectrum is physically richer but visually muddier, and muddiness is the enemy here.
+Counter-propagating waves produce standing patterns. **Honesty:** a song reaches both ears as air pressure; skull-top is not acoustics. See A-010, UI tooltip on song panel.
 
 ---
 
-## The grift-line caution (load-bearing)
+## Song input — decision (shipped)
 
-The phrasing "the degree with which the person resonates the song" is where this could tip from phenomenology into pseudoscience. The precise risk: a viewer reads the visualization as **measuring** how much they "resonate with" a song in a mystical/compatibility sense — a frequency-soulmate meter.
-
-The fix is the same discipline that's protected the project throughout: **honesty about what's computed.** The visualization shows what *the model* does given two frequency inputs. It is a stylized acoustic-interference simulation, not a measurement of a person's attunement. The UI must hold this line — *more* firmly as the rendering gets more convincing, not less.
-
----
-
-## Implementation sketch (when built)
-
-- Add a **second drive source** with a direction vector and a phase relationship to the first.
-- Reuse FFT peak-extraction (from the prototyped audio branch) for song input; reuse the existing hum/slider as the internal source.
-- The interference computation is small: at each zone (or each point, in a future field version), sum the two sources' contributions with their phase offset; constructive where in-phase, destructive where out-of-phase.
-- Rendering: counter-propagating wavefronts meeting in an overlap field — the fun part. In 2D this is two sets of expanding arcs meeting along a contour; in 3D (engine version) it becomes nodal *surfaces.* See [ENGINE_ROADMAP.md](ENGINE_ROADMAP.md).
+| Option | Status |
+|--------|--------|
+| **(1) Dominant pitch** | **Default** — K=1, median-smoothed |
+| **(2) Multi-peak** | **Shipped** — K up to 5, density-adaptive reduction |
+| **(3) Full-spectrum field** | Not shipped — too muddy for legibility |
 
 ---
 
-## Scope note
+## Dual anti-resonance (do not conflate)
 
-This is a meaningful build, comparable to the audio-input feature itself. Treat it as its own focused session, not folded into other work, so it gets done properly. The 2D version is buildable in the current web artifact and would prove the concept before any engine migration.
+| Kind | Mechanism | Where |
+|------|-----------|--------|
+| **Spectral null (α)** | Geometric-mean notches in zone transfer | ◊ presets, `antiResonanceFactor` |
+| **Spatial node (β)** | Field cancellation at grid points | `field.js` when externals active |
+
+See [GLOSSARY.md](GLOSSARY.md).
+
+---
+
+## Implementation map
+
+| Design intent | Code |
+|---------------|------|
+| Internal source position | `INTERNAL_SRC_POS` in `field.js` |
+| External source position | `EXTERNAL_SRC_POS` |
+| Wave sum + grid | `computeField(internal, externalDrivers, vt)` |
+| Zone sampling | `sampleField` in `main.js` loop |
+| Toggle | `state.fieldEnabled`, FIELD button |
+| Mix | `state.externalBalance` |
+| No externals → no field | `hasInterference` guard in `main.js` |
+| Render layer | `drawField` — lighter, clipped, thresholded |
+
+---
+
+## Grift-line caution (load-bearing)
+
+The visualization shows what **the model** does given two frequency inputs — not how much a person “resonates with” a song in a mystical sense. Stronger rendering requires **stronger** disclaimers, not weaker ones.
+
+---
+
+## Verification
+
+Load a sine WAV near chest frequency while internal slider sits on a harmonic — visible beat at difference frequency. See [VERIFICATION.md](VERIFICATION.md).
+
+---
+
+## Engine tier note
+
+2D field proves the concept in-browser. **Volumetric nodal surfaces** and fly-through are STAGED in [ENGINE_ROADMAP.md](ENGINE_ROADMAP.md) — in project scope, not a rejection of 3D.

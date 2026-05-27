@@ -35,13 +35,10 @@ Status legend: **ACTIVE** · **PARTIALLY RESOLVED** · **RESOLVED** · **DEFERRE
 
 ## AIN-RS-004 — Two distinct anti-resonance phenomena are conflated
 
-- **Status:** ACTIVE
-- **Where:** [src/renderer.js](../../src/renderer.js) anti-resonance node visual, naming throughout
-- **Description:** "Anti-resonance" currently covers two physically different things:
-  - **(α) Frequency-domain notch:** a zero in the transfer function (the four hand-picked geometric-mean frequencies). Property of the *resonator system*. Source-position independent.
-  - **(β) Spatial-domain interference node:** a point in space where two coherent waves cancel (what the §5 two-source field computes). Property of the *wave geometry*. Source-position dependent.
-- **Blast radius:** Conflating these would degrade the model. The field doesn't replace the notches; it adds a second class of anti-resonance.
-- **Resolution direction:** Keep both, name them distinctly in UI ("spectral null" for α, "spatial node" for β). Partial resolution when the field (§5a) lands — but only the β half.
+- **Status:** PARTIALLY RESOLVED
+- **Where:** [src/renderer.js](../../src/renderer.js), [src/field.js](../../src/field.js), [GLOSSARY.md](../GLOSSARY.md)
+- **Description:** **(α) Spectral null** — geometric-mean notches (◊ presets). **(β) Spatial node** — field cancellation when song + internal active.
+- **Resolution:** Field shipped (β). Docs distinguish terms; badge label may still say "ANTI-RESONANCE" for α only.
 
 ## AIN-RS-005 — Single-driver assumption baked into UI and physics
 
@@ -61,11 +58,10 @@ Status legend: **ACTIVE** · **PARTIALLY RESOLVED** · **RESOLVED** · **DEFERRE
 
 ## AIN-RS-007 — Breath is missing entirely
 
-- **Status:** ACTIVE (queued for fix)
-- **Where:** None — there is no breath model
-- **Description:** Heartbeat is in the system (~1 Hz, independent rhythm). Vagus particle flow is in the system. **Breath is absent.** Voice rides on breath — every sung phrase is shaped by an exhale's amplitude envelope.
-- **Blast radius:** Any "felt resonance" simulation is incomplete. Autonomic-rhythm story (heart + breath + vagus) is two-thirds told.
-- **Resolution direction:** Add a **breath layer** (§5b). Synthesized sine default (4–6 s period); mic-derived and tap-to-breathe as optional modes.
+- **Status:** RESOLVED (mechanism shipped)
+- **Where:** [src/breath.js](../../src/breath.js), [src/main.js](../../src/main.js)
+- **Description:** Heartbeat (~1 Hz), vagus flow, and breath envelope now coexist. Default: synthesized sine (3–8 s period); optional tap and mic-derived modes.
+- **Remaining:** AIN-RS-015 — whether synth alone is phenomenologically sufficient.
 
 ## AIN-RS-008 — ML scaffold doesn't connect to the artifact
 
@@ -90,10 +86,10 @@ Status legend: **ACTIVE** · **PARTIALLY RESOLVED** · **RESOLVED** · **DEFERRE
 - **Blast radius:** Users with different mental models calibrate the controls differently.
 - **Resolution direction:** Short glossary in `docs/` registering the three senses; mark which one the badge means; keep the others as legitimate but separate.
 
-## AIN-RS-011 — Wave amplitude omits 1/r falloff (anticipatory)
+## AIN-RS-011 — Wave amplitude omits 1/r falloff
 
-- **Status:** ACTIVE (anticipatory — registered before §5a lands)
-- **Where:** Will live in the future `src/field.js`
+- **Status:** ACTIVE
+- **Where:** [src/field.js](../../src/field.js)
 - **Description:** The two-source interference field uses `A·sin(k·r − ω·t)` with constant amplitude. Real point sources have 1/r falloff for spherical waves (or 1/√r for cylindrical). This is a 2D plane-wave-ish approximation, fine for visualization, dishonest for measurement.
 - **Blast radius:** Near-source intensities are over-estimated relative to far-source. Beat patterns are visually exaggerated relative to a measurement.
 - **Resolution direction:** Acceptable simplification for visualization; flag in the field's docs and UI tooltip. Add 1/r as an optional rendering mode if it improves legibility.
@@ -110,21 +106,20 @@ Status legend: **ACTIVE** · **PARTIALLY RESOLVED** · **RESOLVED** · **DEFERRE
 - **Blast radius:** If "pending" modes drift to "settled" without citation, this AIN regresses to AIN-RS-001-with-more-parameters.
 - **Resolution direction:** Quarterly review of `modes[].evidence` values; promote `pending` → `cited` with URLs, or demote to `phenomenological` and flag for removal. Singer's formant cluster (~2.8 kHz) is the obvious next mode to add for skull but requires slider extension to be visible from internal drive — defer until §5a externals can reach it.
 
-## AIN-RS-013 — Source-position geometry is artistic, not anatomical (anticipatory)
+## AIN-RS-013 — Source-position geometry is artistic, not anatomical
 
-- **Status:** ACTIVE (anticipatory)
-- **Where:** Will live in [src/field.js](../../src/field.js) and UI tooltips
+- **Status:** RESOLVED (disclaimer shipped)
+- **Where:** [src/field.js](../../src/field.js), song panel tooltip, A-010
 - **Description:** "External source enters at the top of the skull" is visualization geometry chosen for legibility of the interference pattern, NOT acoustics. A song reaches the body via air pressure at both ears.
 - **Blast radius:** If unflagged, the visualization risks being misread as physiology.
 - **Resolution direction:** Mandatory UI footnote and docs disclaimer wherever the source position is exposed. Refer also to A-010 (assumption).
 
 ## AIN-RS-014 — Relational-graph ML layer absent
 
-- **Status:** DEFERRED (research-scale; §6 of the refinement roadmap)
-- **Where:** Will live in a future `tools/graph_engine/` Python service
-- **Description:** No morphism graph of zones × frequencies × songs × sessions. Cross-domain structural homology detection — the Presence Engine paradigm — is not yet present in this project.
-- **Blast radius:** The artifact remains a single-session instrument; it can't learn relational structure across sessions or songs.
-- **Resolution direction:** Build per §6.1–6.4. Strictly offline (no cloud), strictly passive articulation surface (no recommendations).
+- **Status:** PARTIALLY RESOLVED (offline scaffold shipped; browser ingest + articulation loader landed)
+- **Where:** [tools/graph_engine/](../../tools/graph_engine/), [src/sessions.js](../../src/sessions.js), [src/articulation.js](../../src/articulation.js)
+- **Description:** Morphism graph pipeline (ingest, homology, neti-neti, articulate) runs locally. Browser exports opt-in session JSONL; optional `articulation.json` enriches badge tooltips.
+- **Remaining:** §9 verification harness on real/synthetic corpora; tune similarity thresholds; journal-noticer holdout integration.
 
 ## AIN-RS-015 — Is synthesized breath enough to embody the visualization?
 

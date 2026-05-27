@@ -8,7 +8,7 @@ This is the **§6 scaffolding** of the Resonant Singer refinement roadmap. It im
 - **Neti-neti elimination test** for surface-similar candidates (§6.3 / PE §7.2)
 - Strictly past-tense, strictly passive **articulation surface** (§6.4)
 
-It is **research-scale scaffolding**, not a production service. The components run; the parameters are placeholders to be tuned against real session data when [JOURNAL_NOTICER_DESIGN.md](../../docs/JOURNAL_NOTICER_DESIGN.md) lands.
+It is **research-scale scaffolding**, not a production service. The components run; browser **EXPORT SESSION** feeds `ingest.py`. See [docs/README.md](../../docs/README.md) and [VERIFICATION.md](../../docs/VERIFICATION.md).
 
 ---
 
@@ -79,12 +79,29 @@ sqlite3 graph.db "SELECT status, COUNT(*) FROM homology_candidate GROUP BY statu
 
 ---
 
+## Session schema (browser ↔ ingest)
+
+Canonical zone order lives in [`zones.py`](zones.py) and must match [`src/physics.js`](../../src/physics.js) `ZONE_IDS` / `zones[].id`.
+
+Each exported session line includes **`events[]`** (required for the graph):
+
+| Field | Meaning |
+|-------|---------|
+| `t` | Seconds into session |
+| `internal_f` | Primary internal driver (Hz) |
+| `external_fs` | External song peaks (Hz) |
+| `amps` | Ten rendered zone amplitudes, same order as `zones.py` |
+| `sysAmp` | Mean zone amplitude |
+| `arActive` | Spectral null state or null |
+
+Legacy **`frames[]`** is still emitted for the journal-noticer; ingest will not build morphisms from frames that lack `amps`.
+
+**Smoke test:** `python3 tools/graph_engine/verify_ingest_schema.py`
+
 ## What this scaffolding does NOT do (yet)
 
-- **Browser-side export:** the browser does not yet write `sessions.jsonl`. That hook lives in [src/main.js](../../src/main.js) as a future task — gated behind opt-in.
-- **Browser-side ingestion of articulation:** `src/articulation.js` is not yet created. The plan calls for an optional badge-tooltip enrichment that reads `articulation.json` if present.
-- **Anti-grift verification harness:** §9 of the refinement roadmap prescribes a controlled-construction test that synthesizes two patterns whose only common feature is high chest amplitude. Pre-perm similarity should be high; post-perm similarity should collapse. **That harness is the next thing to build before this engine ships to real data.**
-- **Tuning of τ, depth, COLLAPSE_TOL.** All defaults are placeholders calibrated on intuition. Real values come from the synthetic-sessions corpus once it's adapted to emit the JSONL the ingest expects.
+- **Anti-grift verification harness:** §9 controlled-construction test (chest-only homology rejection) is not automated yet.
+- **Tuning of τ, depth, COLLAPSE_TOL.** Placeholders until a calibrated synthetic corpus exists.
 
 ---
 

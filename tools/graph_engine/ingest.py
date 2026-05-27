@@ -29,8 +29,10 @@ Input format (one JSON object per line):
 import argparse, json, os, sqlite3, sys, time, hashlib
 from pathlib import Path
 
-ZONE_NAMES = ['chest', 'larynx', 'heart', 'abdomen', 'pharynx', 'mouth',
-              'nasal', 'eyes', 'skull', 'ears']
+_SCRIPT_DIR = Path(__file__).resolve().parent
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
+from zones import ZONE_NAMES  # noqa: E402 — must match src/physics.js ZONE_IDS
 N_BANDS    = 32
 BAND_LO_HZ = 70.0
 BAND_HI_HZ = 3000.0
@@ -92,14 +94,30 @@ def ingest_session(con, sess):
     zone_ids = {z: upsert_node(con, 'zone', z) for z in ZONE_NAMES}
 
     last_band = None
-    for ev in sess.get('events', []):
+    # Prefer events[] (graph schema); accept legacy frames[] as minimal events.
+    raw_events = sess.get('events') or []
+    if not raw_events and sess.get('frames'):
+        for fr in sess['frames']:
+            raw_events.append({
+                't': (fr.get('t', 0) / 1000.0) if fr.get('t', 0) > 500 else fr.get('t', 0),
+                'internal_f': fr.get('internal_f', fr.get('f', 0)),
+                'external_fs': fr.get('external_fs', []),
+                'amps': fr.get('amps', []),
+                'sysAmp': fr.get('sysAmp', 0),
+                'arActive': fr.get('arActive'),
+            })
+    for ev in raw_events:
         band = band_for(ev['internal_f'])
         band_id = upsert_node(con, 'band', f'b_{band:02d}',
                               data={'lo': BAND_LO_HZ * (BAND_HI_HZ/BAND_LO_HZ)**(band/N_BANDS),
                                     'hi': BAND_LO_HZ * (BAND_HI_HZ/BAND_LO_HZ)**((band+1)/N_BANDS)})
 
         # Causal morphisms: band → zone for every zone above threshold.
-        amps = ev.get('amps', [])
+        amps = list(ev.get('amps') or [])
+        if len(amps) != len(ZONE_NAMES):
+            if len(amps) == 0:
+                continue
+            amps = (amps + [0.0] * len(ZONE_NAMES))[:len(ZONE_NAMES)]
         for zi, amp in enumerate(amps):
             if amp > 0.40:
                 upsert_morphism(con, band_id, zone_ids[ZONE_NAMES[zi]], 'causal')

@@ -7,6 +7,9 @@
  */
 
 import { zones, freqToNote } from './physics.js';
+import { viewModifiers } from './views.js';
+import { envPresets, envOrder } from './env.js';
+import { downloadSessionsJsonl } from './sessions.js';
 
 
 // ─── Sidebar zone bars ─────────────────────────────────────────
@@ -61,13 +64,39 @@ export function wireControls(state, audio, breath) {
     document.querySelectorAll('.anti-btn').forEach(b => b.classList.remove('active'));
   }
 
-  function setDrive(f, activeBtn) {
+  function setDrive(f, activeBtn, asPin = false) {
+    if (asPin && state.multiMode) {
+      const exists = state.pinnedDrivers.some(d => Math.abs(d.f - f) < 0.5);
+      if (exists) {
+        state.pinnedDrivers = state.pinnedDrivers.filter(d => Math.abs(d.f - f) >= 0.5);
+        if (activeBtn) activeBtn.classList.remove('active');
+      } else {
+        state.pinnedDrivers.push({ f, amp: 0.85, phase: 0, origin: 'preset' });
+        if (activeBtn) activeBtn.classList.add('active');
+      }
+      renderDriveChips();
+      return;
+    }
     state.drivers[0].f = f;
     freqInput.value = f;
     freqVal.textContent = f.toFixed ? f.toFixed(1) : f;
     noteName.textContent = freqToNote(f);
-    clearAllActive();
-    if (activeBtn) activeBtn.classList.add('active');
+    if (!state.multiMode) clearAllActive();
+    if (activeBtn && !state.multiMode) activeBtn.classList.add('active');
+    if (activeBtn && state.multiMode && !asPin) activeBtn.classList.add('active');
+  }
+
+  function renderDriveChips() {
+    const el = document.getElementById('driveChips');
+    if (!el) return;
+    el.innerHTML = '';
+    const list = [state.drivers[0], ...state.pinnedDrivers];
+    list.forEach((d, i) => {
+      const chip = document.createElement('span');
+      chip.className = 'drive-chip' + (i === 0 ? ' primary' : '');
+      chip.textContent = `${d.f.toFixed(0)} Hz`;
+      el.appendChild(chip);
+    });
   }
 
   // Slider
@@ -78,16 +107,93 @@ export function wireControls(state, audio, breath) {
   // Preset buttons (resonance peaks)
   document.querySelectorAll('.preset-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      setDrive(parseFloat(btn.dataset.f), btn);
+      setDrive(parseFloat(btn.dataset.f), btn, state.multiMode);
     });
   });
 
-  // Anti-resonance buttons (dead zones + notches)
   document.querySelectorAll('.anti-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      setDrive(parseFloat(btn.dataset.f), btn);
+      setDrive(parseFloat(btn.dataset.f), btn, state.multiMode);
     });
   });
+
+  const multiBtn = document.getElementById('multi');
+  if (multiBtn) {
+    multiBtn.addEventListener('click', () => {
+      state.multiMode = !state.multiMode;
+      multiBtn.classList.toggle('on', state.multiMode);
+      if (!state.multiMode) {
+        state.pinnedDrivers = [];
+        clearAllActive();
+      }
+      renderDriveChips();
+    });
+  }
+
+  const clearBtn = document.getElementById('clearPins');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      state.pinnedDrivers = [];
+      clearAllActive();
+      renderDriveChips();
+    });
+  }
+
+  const envBtn = document.getElementById('env');
+  if (envBtn) {
+    let envIdx = 0;
+    envBtn.addEventListener('click', () => {
+      envIdx = (envIdx + 1) % envOrder.length;
+      state.envType = envOrder[envIdx];
+      const env = envPresets[state.envType];
+      envBtn.innerHTML = env
+        ? `<span class="lbl">ENV</span>${env.label.split(' · ')[0]}`
+        : '<span class="lbl">ENV</span>NONE';
+      envBtn.classList.toggle('on', state.envType !== 'none');
+    });
+  }
+
+  document.querySelectorAll('.view-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.viewMode = btn.dataset.view;
+      document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const cap = document.getElementById('viewCaption');
+      if (cap) cap.textContent = viewModifiers[state.viewMode]?.caption || '';
+    });
+  });
+
+  const listenBtn = document.getElementById('listen');
+  const audioMeta = document.getElementById('audioMeta');
+  if (listenBtn && audio) {
+    listenBtn.addEventListener('click', async () => {
+      if (audio.isMicActive()) {
+        audio.stopMic();
+        listenBtn.classList.remove('on');
+        if (audioMeta) audioMeta.textContent = 'no mic · slider controls drive';
+        return;
+      }
+      listenBtn.classList.remove('denied');
+      const ok = await audio.startMic();
+      if (!ok) {
+        listenBtn.classList.add('denied');
+        if (audioMeta) audioMeta.textContent = 'mic denied or unavailable';
+        return;
+      }
+      listenBtn.classList.add('on');
+      if (audioMeta) audioMeta.textContent = 'mic live · pitch drives internal source';
+    });
+  }
+
+  const exportBtn = document.getElementById('exportSession');
+  if (exportBtn && state.sessionRecorder) {
+    exportBtn.addEventListener('click', async () => {
+      const line = await state.sessionRecorder.toJsonlLine(audio.lastFile);
+      downloadSessionsJsonl([line]);
+    });
+  }
+
+  renderDriveChips();
 
   // Sweep toggle
   const sweepBtn = document.getElementById('sweep');
@@ -120,6 +226,7 @@ export function wireControls(state, audio, breath) {
 
   // Return a handle for per-frame updates
   return {
+    renderDriveChips,
     updateSweepDisplay() {
       const f = state.drivers[0].f;
       freqInput.value = f;
@@ -214,9 +321,8 @@ function wireBreathControls(breath, state) {
   const periodVal  = document.getElementById('breathPeriodVal');
   const bar        = document.getElementById('breathBar');
 
-  // Mode cycling: synth → tap → synth. Mic deferred per plan §5b (privacy + complexity).
-  const modes = ['sine', 'tap'];
-  const modeLabels = { sine: 'MODE · SYNTH', tap: 'MODE · TAP' };
+  const modes = ['sine', 'tap', 'mic'];
+  const modeLabels = { sine: 'MODE · SYNTH', tap: 'MODE · TAP', mic: 'MODE · MIC' };
   let modeIdx = 0;
 
   toggleBtn.addEventListener('click', () => {

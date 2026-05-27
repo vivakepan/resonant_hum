@@ -1,6 +1,24 @@
 # Journal-Noticer — Design Document
 
-**Status:** Designed, not implemented. This document captures the architecture so it isn't lost; it is the spec a future build would follow.
+**Status:** **PARTIAL SHIPPED** · [README.md](../README.md)  
+**Implements:** [`tools/journal_noticer/noticer.py`](../tools/journal_noticer/noticer.py) · session export [`src/sessions.js`](../src/sessions.js)  
+**Full spec below;** holdout bucket, clip store, hiatus channel → **STAGED**
+
+---
+
+## Implementation status
+
+| Component | Status |
+|-----------|--------|
+| Design + guardrails (this doc) | SHIPPED |
+| Browser opt-in JSONL export | SHIPPED — `EXPORT SESSION` |
+| Minimal weekly markdown runner | SHIPPED — `noticer.py` |
+| Clip-bounded aggregate log | STAGED |
+| Holdout control group | STAGED |
+| Corrigibility / hiatus channel | STAGED |
+| Pre-registered public schema commit | STAGED |
+
+Pipeline: browser → `sessions.jsonl` → `noticer.py` and/or `tools/graph_engine/ingest.py`.
 
 ---
 

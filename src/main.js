@@ -13,6 +13,10 @@ import { createZoneBars, updateZoneBars, wireControls } from './ui.js';
 import { computeField, drawField, sampleField } from './field.js';
 import { AudioEngine } from './audio.js';
 import { BreathEngine } from './breath.js';
+import { applyViewScale } from './views.js';
+import { envDriver, applyEnvFloor } from './env.js';
+import { createSessionRecorder } from './sessions.js';
+import { loadArticulation, articulationHint } from './articulation.js';
 
 
 // ─── Canvas setup ──────────────────────────────────────────────
@@ -64,6 +68,13 @@ const state = {
   externalDrivers: [],
   externalBalance: 0.7,
   fieldEnabled: true,
+  viewMode: 'organs',
+  envType: 'none',
+  multiMode: false,
+  pinnedDrivers: [],
+  breathEnabled: true,
+  sessionRecorder: null,
+  articulationDoc: null,
 };
 
 // Per-zone envelope time constants (seconds). Capped to a sensible
@@ -79,6 +90,9 @@ const rowEls    = createZoneBars();
 const audio     = new AudioEngine();
 const breath    = new BreathEngine();
 const ui        = wireControls(state, audio, breath);
+
+state.sessionRecorder = createSessionRecorder(state, zones);
+loadArticulation().then(doc => { state.articulationDoc = doc; });
 
 
 // ─── Animation loop ────────────────────────────────────────────
@@ -104,8 +118,18 @@ function frame(now) {
   // at exhale-mid, internal amp ≈ 1. Zones receive the modulated signal
   // and their AIN-RS-006 envelopes naturally smooth the in/out transitions
   // so the visualization "breathes" instead of clicking on and off.
-  const breathEnv = breath.envelope(state.vt);
-  state.drivers[0].amp = breathEnv;
+  const breathEnv = breath.enabled ? breath.envelope(state.vt) : 1;
+
+  // Mic → internal driver frequency (FFT peak; see docs/AUDIO_PIPELINE_DESIGN.md)
+  const micInternal = audio.stepMicInternal();
+  if (micInternal.length) {
+    state.drivers[0].f = micInternal[0].f;
+    state.drivers[0].amp = breathEnv;
+    if (state.sweeping) state.sweeping = false;
+    ui.updateSweepDisplay();
+  } else {
+    state.drivers[0].amp = breathEnv;
+  }
 
   // ── §5a: rebuild external drivers from audio peaks each frame ──
   // External amplitudes are scaled by externalBalance so the user can
@@ -113,9 +137,14 @@ function frame(now) {
   // and density-adaptive K; we just fold the result into state.drivers.
   const audioPeaks = audio.step();
   state.externalDrivers = audioPeaks.map(p => ({ ...p, amp: p.amp * state.externalBalance }));
-  const allDrivers = state.externalDrivers.length
-    ? [state.drivers[0], ...state.externalDrivers]
-    : state.drivers;
+  const envD = envDriver(state.envType);
+  const pinned = state.pinnedDrivers.map(d => ({ ...d, origin: d.origin || 'preset' }));
+  const allDrivers = [
+    state.drivers[0],
+    ...pinned.filter(d => Math.abs(d.f - state.drivers[0].f) > 0.5),
+    ...state.externalDrivers,
+    ...(envD ? [envD] : []),
+  ];
 
   // ── §5a: interference field (computed before zones so they can sample it) ──
   // Internal driver is positioned at the larynx; external drivers all radiate
@@ -141,9 +170,9 @@ function frame(now) {
   const pf      = primaryF(state.drivers);
   const target  = zones.map(z => {
     let t = zoneResponse(z, allDrivers);
+    t = applyViewScale(z, t, state.viewMode);
     if (field) {
       const s = Math.abs(sampleField(field, z.nx, z.ny));
-      // Field sample tops out around ~(N drivers), so normalize cautiously.
       const fieldGain = Math.min(0.35, s * 0.20);
       t = Math.min(1, t * (1 + fieldGain));
     }
@@ -154,7 +183,8 @@ function frame(now) {
     const alpha = 1 - Math.exp(-dt_s / ZONE_TAU[i]);
     state.zoneAmpsDyn[i] += alpha * (target[i] - state.zoneAmpsDyn[i]);
   }
-  const amps        = applyCoupling(state.zoneAmpsDyn);
+  let amps          = applyCoupling(state.zoneAmpsDyn);
+  amps              = applyEnvFloor(amps, state.envType);
   const sysAmp      = amps.reduce((s, a) => s + a, 0) / amps.length;
   const activeCount = amps.filter(a => a > 0.4).length;
   const arActive    = activeAntiResonance(allDrivers);
@@ -186,6 +216,11 @@ function frame(now) {
   // ── UI updates ──
   updateZoneBars(rowEls, amps);
   updateBadge(sysAmp, activeCount, arActive);
+  const badge = document.getElementById('badge');
+  const hint = articulationHint(state.articulationDoc, sysAmp, activeCount);
+  if (hint) badge.title = hint;
+  const externalFs = state.externalDrivers.map(d => d.f);
+  state.sessionRecorder.sample(sysAmp, activeCount, arActive, pf, amps, externalFs);
   ui.updateBreathDisplay(state.vt);
 
   requestAnimationFrame(frame);

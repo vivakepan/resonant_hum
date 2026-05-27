@@ -25,11 +25,13 @@ of pre-permutation similarity, averaged over N=50 trials.
 
 import argparse, random, sqlite3, sys, time
 from collections import Counter
-from homology import typed_paths, jaccard, DEPTH
+from pathlib import Path
 
-# Zone identity set (matches src/physics.js zone names).
-ZONE_NAMES = ['chest', 'larynx', 'heart', 'abdomen', 'pharynx', 'mouth',
-              'nasal', 'eyes', 'skull', 'ears']
+_SCRIPT_DIR = Path(__file__).resolve().parent
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
+from zones import ZONE_NAMES  # noqa: E402
+from homology import typed_paths, jaccard, DEPTH
 
 N_PERMUTATIONS = 50          # trials per candidate
 COLLAPSE_TOL   = 0.10        # post-perm avg must be within this of pre-perm

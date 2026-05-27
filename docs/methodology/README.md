@@ -2,6 +2,10 @@
 
 These files implement the **Isomorphic Enrichment, Alignment Tracking, and Active Ignorance Registry** discipline from the parent methodology document (Methodology v1.2) for the Resonant Singer project. They are *living* artifacts: any non-trivial change to the system should add to or amend them.
 
+**Project docs:** [README.md](../README.md) · [docs index](../README.md) · [ARCHITECTURE.md](../ARCHITECTURE.md)
+
+---
+
 ## Why these files exist
 
 The parent methodology rests on four assumptions:
@@ -13,17 +17,22 @@ The parent methodology rests on four assumptions:
 
 Practically: instead of declaring "the resonance model works," we maintain a registry of what we *don't* know, what we've *assumed*, and what structural patterns we've *imported from other domains*. When the model fails or a new feature lands, those registries get amended — not erased.
 
-## The three day-one registries
+---
 
-- **[assumptions.md](assumptions.md)** — all active assumptions with falsification conditions. Each assumption has a status (ACTIVE / REFINED / FALSIFIED / UNTESTED) and a blast radius.
-- **[active_ignorance_nodes.md](active_ignorance_nodes.md)** — explicit boundaries of understanding. An AIN is a registered illogical relationship or unresolved gap. Each AIN names where in the code it lives and what would resolve it.
-- **[isomorphic_mappings.md](isomorphic_mappings.md)** — cross-domain structural mappings imported into the project, each classified by quality.
+## Registries
 
-Two more files (`failures.md`, `alignment_log.md`) will be created when they have content — empty registries are ceremony, not discipline.
+- **[assumptions.md](assumptions.md)** — active assumptions with falsification conditions.
+- **[active_ignorance_nodes.md](active_ignorance_nodes.md)** — explicit boundaries of understanding (AINs).
+- **[isomorphic_mappings.md](isomorphic_mappings.md)** — cross-domain mappings with tier classification.
 
-## The four-tier mapping classification
+Created when they have content (not ceremony):
 
-When importing structure from another domain (acoustics, room physics, Helmholtz resonators, etc.), classify the mapping:
+- `failures.md` — when a falsification condition fires.
+- `alignment_log.md` — at first quarterly review with real session data.
+
+---
+
+## Four-tier mapping classification
 
 | Tier | Meaning | What transfers |
 |---|---|---|
@@ -34,7 +43,9 @@ When importing structure from another domain (acoustics, room physics, Helmholtz
 
 A new mapping cannot be added without naming the **invariant** it preserves. Without that, it's a SURFACE ANALOGY and shouldn't be load-bearing.
 
-## The alignment metric (four dimensions, qualitative)
+---
+
+## Alignment metric (four dimensions, qualitative)
 
 After each significant change, review:
 
@@ -43,21 +54,32 @@ After each significant change, review:
 3. **Convergence** — is the description getting *richer* over time, or just *bigger*?
 4. **Residual** — what remains unaccounted for?
 
-A red flag is description becoming *simpler* without warrant — that's the signature of false closure (declaring success against a simplified problem).
+A red flag is description becoming *simpler* without warrant — that's false closure.
+
+---
 
 ## How to use these in a PR
 
 Every non-trivial PR should:
 
-1. Touch at least one registry (add an AIN, update an assumption, register a new mapping, or note a failure).
+1. Touch at least one registry (add an AIN, update an assumption, register a mapping, or note a failure).
 2. State which AIN(s) it resolves, partially resolves, or surfaces.
-3. If it introduces a cross-domain claim ("this is like X in domain Y"), add it to `isomorphic_mappings.md` with a tier classification.
+3. If behavior changed, update [ARCHITECTURE.md](../ARCHITECTURE.md) and any design doc **Status** line.
+4. If introducing a cross-domain claim, add it to `isomorphic_mappings.md` with a tier.
 
-This is a discipline, not a process. The goal is to make our boundary of understanding visible to ourselves and to future contributors.
+---
 
 ## Parent documents
 
-- `methodology_v1_2.md` — the operational framework these registries implement.
-- `PresenceEngine_v2_2.md` — sibling research program; the morphism graph (§6 of the refinement roadmap) is convergent with its architecture.
+- `methodology_v1_2.md` — operational framework (outside this repo).
+- `PresenceEngine_v2_2.md` — morphism graph program; convergent with `tools/graph_engine/`.
 
-Both live outside this repository as part of the broader research program.
+---
+
+## Offline stack (same methodology)
+
+| Tool | Registry touchpoint |
+|------|---------------------|
+| [tools/graph_engine/](../../tools/graph_engine/) | IM-006, AIN-RS-014 |
+| [tools/synthetic_sessions/](../../tools/synthetic_sessions/) | A-009, controlled labels |
+| [tools/journal_noticer/](../../tools/journal_noticer/) | AIN-RS-003, founding principle in [JOURNAL_NOTICER_DESIGN.md](../JOURNAL_NOTICER_DESIGN.md) |
