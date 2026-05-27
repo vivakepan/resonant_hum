@@ -1,127 +1,158 @@
 # The Resonant Singer
 
-*A visual tuner, in a philosophical sense.*
+*A visual tuner for resonance — not pitch, not compatibility, not healing.*
 
 ---
 
-A tuner doesn't make the pitch. The player does. A tuner doesn't decide whether the pitch is right. The player does. A tuner just shows you where you are.
+A guitar tuner does not choose the note. It shows where the string is. You decide whether to bend, retune, or leave it.
 
-What you're about to look at does that for **resonance** instead of pitch.
+This page does something analogous for **resonance inside a body**: where a sustained tone or a quiet hum might *land* in the chest, throat, skull, and ears — and where it might fall into a dead zone, or into a narrow notch where two coupled cavities cancel each other below silence.
 
----
-
-*[embed: index.html or dist/vocal_resonance.html]*
+That is a singer's vocabulary, borrowed from voice pedagogy: **placement**. Teachers say a note sits "in the mask," "in the chest," "behind the eyes." The words are operational because the sensation has no picture. The artifact is an attempt at the picture.
 
 ---
 
-Use it however you want. There's no required way.
+*[Open the instrument: `/index.html` on a local server, or the portable build in `dist/`]*
 
-Some people will use it to *train their voice.* Some to *see what vocal fry looks like.* Some to *see what meditation looks like.* Some for *no reason at all.* All of these are correct.
+---
 
-Move the slider through 70–900 Hz and watch which parts of the body light up. Click the presets on the right for known resonance peaks. Click the ◊-marked buttons on the left for *anti-resonance notches* — frequencies where two coupled cavities interfere out-of-phase and cancel each other below baseline. Hit SWEEP at 0.25× speed and crawl through the spectrum; you'll see peaks, dead zones, and cancellation notches resolve in sequence as the drive frequency moves.
+## Three floors (pick yours)
 
-Below this is something else, for anyone who wants it: a two-step way of using your own body as the second instrument. You don't have to do that. You don't have to read further. You can just play.
+```mermaid
+flowchart LR
+  F1["Floor 1 — Play"]
+  F2["Floor 2 — Notice"]
+  F3["Floor 3 — Inspect"]
+  F1 -->|"optional"| F2 -->|"optional"| F3
+```
 
-## Two ways to use it
+Floor 1 needs no docs. Floor 3 is optional and points to the research stack below.
 
-You can absolutely treat the artifact as a fidget — slider, presets, watching the body light up while you do something else. That's a real use. Nothing in the rest of this essay matters if that's all you want.
+**Floor one — play.** Drag the slider from 70 to 900 Hz. Click presets. Watch zones glow, couple, and sometimes dim below baseline at the ◊-marked frequencies on the left. Load a song and turn on the interference field. Switch view modes (Organs, Flow, Nerves, Solid, EM) and see the same physics through different visual weightings. No reading required. No belief required.
 
-For anyone who wants the other version, there's a two-step practice. It's not new. People have been doing variants of it for centuries.
+**Floor two — notice.** Read the panels. Try the protocols below. Ask whether what you feel lines up with what lights up — or doesn't. Disagreement is data.
 
-### One — the silent hum
+**Floor three — inspect.** The repository is open source. The [architecture documentation](ARCHITECTURE.md) lists every stylization. Optional: [vibrational system](vibrational-system.md) (diagrams and reasoning). The [methodology registries](methodology/) track what we do not know on purpose. Offline tools generate synthetic sessions, build a relational graph over exploration patterns, and write weekly aggregate journals that are allowed to say *nothing happened.* That layer is research infrastructure, not mystique.
 
-Find a quiet room. If you have headphones, put them on with the sound off (not strictly necessary, but it helps the body listen inward instead of outward). Eyes closed.
+All three floors are legitimate. The project is deliberately **half instrument, half experiment.**
 
-Hum at *the quietest pitch you can sustain.* Just barely audible to yourself, almost inaudible to someone sitting next to you. Jaw closed but soft. Lips relaxed. Don't try to make it ring. Just notice where it lives — chest, teeth, soft palate, the back of the skull. Pay attention to which of those is participating. They all might be. They might all be different from each other.
+---
 
-Do this for 30 to 60 seconds. Open your eyes if you want, or don't.
+## What you are looking at (honestly)
 
-### Two — being sung through
+The silhouette is not your body. It is a chain of **ten coupled resonators** — chest, heart region, trachea, larynx, pharynx, mouth, nasal cavities, skull, eyes, inner ear — each with a hand-tuned natural frequency and a bandwidth, wired together by an anatomical adjacency graph, not by guesswork from pixel distance.
 
-Put on a song you love. Headphones, comfortable volume. *Don't sing along.* Don't even mouth the words.
+When you move the drive frequency, the model asks: which harmonics of this tone fall near which cavity modes? How do excited zones lift their neighbors? Does the system cross a threshold where many zones fire at once — what the badge calls whole-system resonance?
 
-Instead, breathe the same silent pitch from Step One — quietly, jaw gently closed — and let the song happen to the body. Chest, throat, skull, ears, sometimes the back of the eyes. Let them participate without producing sound. Instead of *listening with the ears,* let it be the whole body.
+Two further layers sit on top of that base physics:
 
-Some people feel this immediately. Some don't. Either is fine. The point isn't that something dramatic happens. The point is the trying.
+1. **Breath** — a slow envelope modulating the internal source, because voice rides on exhale. Default is synthesized rhythm; you can tap spacebar or, if you prefer, let mic level shape it.
+
+2. **Field** — when you add a song, external spectral peaks enter from a visualization point above the skull (legible geometry, not clinical acoustics; the UI says so). Internal hum rises from the larynx. The grid shows where those waves meet, construct, and cancel. That is **spatial** interference, distinct from the **spectral nulls** at the ◊ buttons, which are frequency-domain notches between paired zones. Both are real in the model; they are not the same phenomenon.
+
+Nothing here measures whether a song "resonates with you" emotionally. The model does not know your biography. It computes a stylized acoustic cartoon informed by how singers describe placement — then invites you to compare cartoon to sensation.
+
+**Want the full vibrational picture?** See the standalone companion: [**The body as a vibrational system (stylized)**](vibrational-system.md) — many clocks, source–filter, coupling, interference, diagrams, and a claim-vs-sensation checklist. Optional reading; the instrument works without it.
+
+---
+
+## A short protocol (optional)
+
+You can ignore this entirely and still use the instrument fairly.
+
+### One — quiet hum, eyes in
+
+Find a quiet room. Headphones on, sound off, if that helps you listen inward.
+
+Hum at the **quietest pitch you can sustain** — barely audible, jaw soft, lips relaxed. Do not perform. Notice where vibration seems to live: sternum, teeth, palate, skull. Thirty to sixty seconds.
+
+Open the instrument. Move the slider slowly, or use **LISTEN · MIC** if you want the display to follow your pitch. *Mic changes the posture:* you are no longer only noticing; you are also being measured. That is optional. The slider alone preserves a purely first-person loop.
+
+### Two — song as second source, body as medium
+
+Choose a song you love. Comfortable volume. **Do not sing along.**
+
+Keep the same silent hum from Step One. Let the track enter the model: load the file, play, raise **EXT BAL**, enable **FIELD**. Watch external and internal drivers overlap on the silhouette.
+
+You are not asking whether the song is "your frequency." You are watching a **meeting** — two periodic sources superposed in a stylized volume (see [When two periodic sources meet](vibrational-system.md#when-two-periodic-sources-meet)) — and optionally asking whether that meeting resembles anything you feel in the chest or head.
+
+Some people feel correspondence immediately. Some feel nothing. Some feel something the model does not show. All three outcomes are useful if you report them honestly.
+
+### Three — sweep the spectrum (one minute)
+
+Hit **SWEEP** and set **RATE** to 0.25×. Let the drive crawl. Watch peaks, nulls, and coupling states arrive in sequence. This is the fastest way to see that the body-in-the-model is a **system**, not ten independent lights — the same idea as [coupling](vibrational-system.md#coupling-why-one-glow-spreads-to-neighbors) and [two-source interference](vibrational-system.md#when-two-periodic-sources-meet) in motion.
+
+---
 
 ## What this is not
 
-Not a frequency-healing claim. Not "528 Hz love." Not "tune your vagus." Not solfeggio, not chakra-tuning, not binaural-beats-cure-anxiety.
+Not clinical biomechanics. Not MRI. Not a claim that 432 Hz heals, that the vagus "wants" a tone, or that compatibility with an artist is encoded in Hertz.
 
-The artifact is a *stylization.* Stylized in the original Latin sense — *to bring into the form of a style.* It's coupled oscillators on a body silhouette, derived from acoustics and a singer's felt experience, not from clinical biomechanics. The natural frequencies, the bandwidths, the coupling strengths — they're chosen to demonstrate the *concept* of resonance through the body, not to predict what would happen in an MRI. The anti-resonance notches are computed at the geometric mean of paired zones using a Gaussian subtraction model, which is qualitatively faithful to coupled-oscillator physics but is not a phase-derived computation. The architecture documentation in the repository lays out all of these stylizations explicitly so anyone can check the work.
+Not a recommender. The badge may eventually show past-tense notes from aggregate exploration (*"sessions often paired chest and heart near this band"*), never *"try shifting down 8 Hz."* The user leads; the system reports.
 
-What I'm inviting is closer to *phenomenology* than to hypothesis testing. First-person noticing. Judgment suspended. The older sense of *experiment* (Latin *experiri,* "to try") rather than the controlled-conditions one. We're not running a study. We're trying something on, together.
-
-If you've been burned by the wellness-grifter genre — the "ancient solfeggio" people, the "binaural beats heal cancer" people, the social-media-shaman-with-singing-bowls people — I want you to know I'm not playing on that field. The artifact doesn't promise anything. It shows you something. Whether anything in your body responds is your own business.
-
-## Lineage
-
-Variants of this practice exist in several traditions, and it's worth naming them.
-
-In yoga, the closed-mouth hum is **bhramari** — bee-breath. The pitch is kept low and steady and the hum is felt through the skull. Practitioners report a sense of "all noise quieting" after a minute or two; the sensation is consistent enough across people that it has its own classical instructional texts. The Hatha Yoga Pradipika devotes a section to it. It's not mystical. It's a closed-mouth-hum, paid attention to.
-
-In classical voice pedagogy, the concept singers spend years learning to feel is called **placement** — the felt sense of *where* a sound lands in the body. Singers describe notes as being "in the mask" (face/sinuses), "in the chest" (sternum), "on the soft palate," "behind the eyes." This vocabulary is not metaphor. It's the operational description used by every conservatory voice teacher to communicate with students about something that has no visual referent. The artifact above is the closest thing I've seen to making that referent visible.
-
-In several Sufi traditions, there is a practice of **internal recitation** — speaking sacred phrases silently, with the body posture and breath of speaking aloud, but no sound produced. Practitioners describe it as "the body recites." The mechanism is similar to Step Two of the protocol above.
-
-There is also a concept called **vocal fry** — a specific kind of glottal articulation at very low pitch where the vocal folds vibrate slowly enough to produce a creaky, rasping sound. It shows up in a lot of contemporary speech (some people find it grating; others find it intimate) and in many singers' tool kits. Kurt Cobain used it constantly. It's interesting in this context because vocal fry sits at the low edge of what the artifact's slider can reach — and the body's response to fry is qualitatively different from sustained-tone response, because fry contains broad-band harmonic content rather than a clean fundamental. A longer essay on focal fry sits in the archive of this project; readers who want that conversation can reach out.
-
-I'm naming these lineages because the practice in the protocol above is not new. The lens — using a real-time visual referent for what the body might be doing — is what's new. The lens doesn't make the practice work better. It just makes it more legible.
-
-## A note on safety
-
-The practice is benign for almost everyone. A few things to know anyway:
-
-If you have **tinnitus** or any inner-ear condition, the silent hum can subtly amplify what's already there. If that's uncomfortable, stop. The artifact alone is fine to watch.
-
-If you have **TMJ** or jaw issues, keep the jaw soft. The hum doesn't require any pressure.
-
-Don't do this **while driving** or doing anything that requires open attention to the outside world. The "being sung through" state is a closed-eye, sit-still practice.
-
-If at any point this becomes **anxious or destabilizing** rather than quieting — and it can, for some people in some states — just stop. Open eyes. Drink water. Walk around. There's no virtue in pushing through.
-
-That's the whole safety brief. You won't break anything.
-
-## What I'm asking, if you'd like to share
-
-If you tried this and want to say something about it, there's a form at *[link to anonymous form when set up]*. Two prompts:
-
-**What did you notice?**
-
-**What didn't happen?**
-
-The second prompt is the more important one, oddly. People who feel nothing tend not to write at all, which means everything written looks like confirmation. If you tried this, sat quietly for two minutes, and nothing happened, *that's the most valuable possible report.* It's what keeps this from becoming an echo chamber.
-
-A third field for "I just had it open while I cooked dinner and watched the colors" is also welcome. That's a use. It counts. Tell me about it.
-
-Anonymous is fine. Identified is fine. There's no list and no follow-up sequence. I read every response and may or may not write a follow-up piece weeks or months from now. If I do, I'll quote responses only with explicit permission and only anonymously unless you say otherwise.
-
-If you want to reach out about further research, collaboration, or the longer technical project this artifact is part of, the address is *[contact].* I'm slow but I read.
-
-## Origin material — the back room
-
-This artifact is the front door of a longer project. Most people will be served entirely by what's on this page; a small number will want to know what's behind it. For those readers, there is a separate set of documents — the technical paper on the system architecture this lives within, the methodology behind how the project develops, the conversation in which the original gestalt arrived (a 3-hour singing session that compressed into what felt like twenty minutes, then a long AI chat that pulled in flow states, Yoga Nidra, Samadhi, and the question of whether the senses are resonance organs rather than defense organs), and the longer essay on focal fry that the artifact was originally drawn to illustrate.
-
-These are not gated. They're just not the front door. If you've tried the practice, played with the artifact, and want to see what soil it grew from, reach out and I'll share what's relevant. The reason for the tiered structure isn't secrecy. It's that the practice works better when you bring your own attention to it, and the origin material — which is honest about being a personal account, an AI conversation with all the quirks of an AI conversation, and a research project in early stages — could pre-shape that attention in ways the practice itself doesn't.
-
-In the meantime: the artifact is here. The protocol is above. The architecture is on GitHub. The essay you just read is the whole of what's promised. Anything beyond that is bonus.
+Not a finished science. Zone frequencies carry `evidence` fields: phenomenological, pending citation, or drawn from acoustic literature ranges. Assumptions are registered with falsification conditions. When the model is wrong, the intended response is to **amend the description**, not defend the glow.
 
 ---
 
-## A small structural note
+## Lineage (brief)
 
-The artifact embedded above is open source under MIT. The code lives in a repository called `resonant-singer`. It's structured for legibility — you can read the physics module in twenty minutes and understand exactly what it's computing. If you want to fork it, change the zone frequencies, add new modes, build something else on the same chassis, please do. The accompanying architecture documentation walks through every design decision and is honest about every stylization.
+**Placement** in classical voice training — the felt address of a tone — is the central debt. Closed-mouth humming appears in many traditions (bee-breath in yoga, internal recitation in several contemplative lineages, warm-up hums in choral rooms). The artifact does not import a single tradition's metaphysics. It imports a **shared observation**: people can feel sound in specific interior locations, and that feeling can be attended to without making it loud.
 
-The artifact is built deliberately without an audio-input pipeline in this published version, even though that pipeline exists in a development branch. The reason: the silent practice in Step One and the silent-listening practice in Step Two are easier to enter when there's no microphone running. A microphone changes the posture. It makes the act of humming into the act of being-measured-while-humming. That's a different thing.
+**Vocal fry** — the low creaky register — sits at the edge of the slider range and excites the model differently because the source is broadband, not a clean fundamental. Fry is its own small essay; this instrument is enough to start.
 
-I may release the mic-driven version later, as a separate page, for people who want to see what their own voice does in real time. It's a fun thing. It's a different practice. It belongs in a different room.
+What is new here is not the hum. It is the **legible coupled system**: nulls, coupling, interference, breath, optional mic, optional song — and beside it, a discipline that records ignorance on purpose.
 
 ---
 
-A tuner doesn't make the pitch. The player does.
+## Safety (brief)
 
-What's interesting is that, on some readings, you are simultaneously the tuner *and* the player. The body is the instrument and the awareness that watches the instrument. The artifact above is a way of making one of those visible to the other.
+Benign for most people. Stop if jaw pain (TMJ), if inner-ear conditions make quiet hum uncomfortable, or if closed-eye listening while driving. If the practice tips from quiet into anxious, open your eyes, stand up, drink water. No virtue in pushing through.
 
-Or it's just colored lights on a screen. That's also fine.
+---
+
+## If you want to report what happened
+
+Anonymous form: *[link when live]*
+
+Prompts that matter equally:
+
+- **What did you notice?**
+- **What did not happen?**
+- **I only watched it while cooking / coding / half-listening.**
+
+The second and third keep this from becoming a confirmation gallery. Opt-in session export exists in the instrument for researchers; it sends scalars only, not audio. See the [README](../README.md).
+
+Contact for collaboration or deeper technical material: *[contact]*
+
+---
+
+## How this artifact sits in the larger project
+
+The browser page is the **front door**. Behind it:
+
+- Architecture and glossary docs that stay code-true.
+- A graph engine that asks whether two exploration patterns are structurally alike — or only alike because the chest always lights up (a neti-neti elimination test).
+- Synthetic sessions that train classifiers on data whose physics we authored, so we can see whether machine learning recovers structure we planted.
+- A journal-noticer that publishes null weeks with the same dignity as signal weeks.
+
+That back room exists for people who build systems and care how systems fail when they pretend to know too much. It is not required for the practice above.
+
+The artifact began as a single visual aid during a long evening of singing — time dilating, attention narrowing to where each pitch seemed to sit — and grew through iteration into an instrument with explicit unknowns. The methodology documents are the admission that stylization is not shameful; unmarked stylization is.
+
+---
+
+## Open source
+
+MIT license. Repository: `resonant-singer`. Fork it, break the frequencies, add modes, argue with the adjacency graph. The physics module is readable in twenty minutes. Every design choice worth arguing about is written down.
+
+Mic and song processing stay on your machine. Nothing uploads unless you export a session on purpose.
+
+---
+
+A tuner does not make the pitch. The player does.
+
+Here, you may be both — the source and the ear that watches the source — made visible to each other for a little while.
+
+Or it is colored light on a screen. That is also a valid use.
 
 Use it however you want.

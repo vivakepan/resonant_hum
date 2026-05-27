@@ -1,5 +1,7 @@
 # Synthetic Session Generator + Training Scaffold
 
+**Status:** SHIPPED · [README.md](../../README.md) · [docs/VERIFICATION.md](../../docs/VERIFICATION.md)
+
 A self-contained ML learning project built on the Resonant Singer physics. It generates labeled synthetic user-sessions from the *same* coupled-oscillator model the artifact renders, then trains a model to predict a behavioral label from the session trace.
 
 The point is **not** the accuracy number. The point is an end-to-end ML loop on data whose generative process you fully control — which is the cleanest possible setup for learning, because you can verify whether the model recovers the structure you put in.

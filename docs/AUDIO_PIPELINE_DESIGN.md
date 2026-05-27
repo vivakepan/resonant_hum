@@ -1,6 +1,24 @@
 # Audio Pipeline — Architecture & Design Brief
 
-*Research pass output (item 8). Browser-deployable, privacy-preserving audio-feature ML for the Resonant Singer. Architectural patterns, failure modes, and decision criteria — not a library shopping list.*
+**Status:** **PARTIAL SHIPPED** · [README.md](../README.md)  
+**Implements:** [`src/audio.js`](../src/audio.js) · breath mic mode in [`src/breath.js`](../src/breath.js)  
+**Architecture:** [ARCHITECTURE.md](ARCHITECTURE.md) · **STAGED:** YIN/MPM in AudioWorklet
+
+*Research pass output. Browser-deployable, privacy-preserving audio. Architectural patterns, failure modes, and decision criteria — not a library shopping list.*
+
+---
+
+## As-built vs design target
+
+| Capability | Design target | Shipped |
+|------------|---------------|---------|
+| Hum pitch | YIN/MPM in AudioWorklet | **FFT dominant peak** on main-thread `AnalyserNode` |
+| Music file | FFT peak-pick / dominant pitch | **Yes** — K=1 default, K≤5 optional |
+| Raw audio off-device | Never | **Yes** |
+| Session export | Safe scalars only | **Yes** — [`src/sessions.js`](../src/sessions.js) |
+| Neural pitch (CREPE/SPICE) | Fallback only | **Not implemented** |
+
+Upgrade path: move pitch loop to AudioWorklet with YIN without changing physics API (`drivers[]`).
 
 ---
 
@@ -152,9 +170,9 @@ Where each piece runs, what crosses each boundary:
                 │ postMessage: scalars only (F0, clarity, centroid)
                 ▼
 ┌─ Main thread ────────────────────────────────────────────────┐
-│  • receives scalars, drives state.driveF                     │
-│  • physics.js (unchanged) → renderer.js (unchanged)          │
-│  • the audio source is just another driver of driveF         │
+│  • receives scalars, updates drivers[] (internal / external) │
+│  • physics.js → renderer.js (unchanged contract)             │
+│  • audio is another source of drivers[]                      │
 └───────────────┬──────────────────────────────────────────────┘
                 │ (ONLY if user opts in)
                 │ session summary: {found_nonobvious: bool,
@@ -167,7 +185,7 @@ Where each piece runs, what crosses each boundary:
 └──────────────────────────────────────────────────────────────┘
 ```
 
-The elegant part: **the audio layer plugs into the existing architecture at exactly one point** — it becomes another thing that sets `state.driveF`. The physics, rendering, and UI are untouched. The multi-driver refactor (letting `driveF` become `driveFs[]`) is the one structural change needed for the interference mode, and it's small.
+The audio layer plugs into **`drivers[]`**: mic/file update internal or external origins; physics and rendering consume the combined driver set. Multi-driver, field, and env layers are **shipped** (see [ARCHITECTURE.md](ARCHITECTURE.md)).
 
 ### When NOT to use ML at all (the summary judgment)
 

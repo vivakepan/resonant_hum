@@ -40,10 +40,17 @@ export function createParticles(count = 18) {
 
 // ─── Body silhouette ───────────────────────────────────────────
 
-export function drawSilhouette(ctx, W, H) {
+export function drawSilhouette(ctx, W, H, breathEnv = 1) {
   ctx.save();
   ctx.strokeStyle = 'rgba(120,150,180,0.18)';
   ctx.lineWidth = 1;
+
+  // §5b: subtle chest sway tied to breath. Exhale-mid pushes the chest
+  // wall outward by ~1.5%; inhale-top pulls it slightly inward. Not
+  // anatomically accurate (chest moves outward on *inhale* in reality)
+  // — this is phenomenological: "voice expands the chest on the held note."
+  const swayX = 0.015 * (breathEnv - 0.5) * 2;  // [-0.015, +0.015]
+  const swayY = 0.008 * (breathEnv - 0.5) * 2;
 
   // Skull outline
   ctx.beginPath();
@@ -65,21 +72,21 @@ export function drawSilhouette(ctx, W, H) {
   ctx.lineTo(W * 0.555, H * 0.46);
   ctx.stroke();
 
-  // Chest cavity
+  // Chest cavity — outer wall sways with breath
   ctx.beginPath();
-  ctx.moveTo(W * 0.36, H * 0.50);
-  ctx.quadraticCurveTo(W * 0.32, H * 0.78, W * 0.40, H * 0.92);
+  ctx.moveTo(W * (0.36 - swayX), H * 0.50);
+  ctx.quadraticCurveTo(W * (0.32 - swayX), H * (0.78 + swayY), W * 0.40, H * 0.92);
   ctx.lineTo(W * 0.60, H * 0.92);
-  ctx.quadraticCurveTo(W * 0.68, H * 0.78, W * 0.64, H * 0.50);
+  ctx.quadraticCurveTo(W * (0.68 + swayX), H * (0.78 + swayY), W * (0.64 + swayX), H * 0.50);
   ctx.stroke();
 
-  // Ribs hint
+  // Ribs hint — track the sway proportionally
   ctx.strokeStyle = 'rgba(120,150,180,0.09)';
   for (let i = 0; i < 6; i++) {
     const y = H * 0.56 + i * H * 0.045;
     ctx.beginPath();
-    ctx.moveTo(W * 0.37, y);
-    ctx.quadraticCurveTo(W * 0.50, y + H * 0.012, W * 0.63, y);
+    ctx.moveTo(W * (0.37 - swayX * 0.6), y);
+    ctx.quadraticCurveTo(W * 0.50, y + H * 0.012, W * (0.63 + swayX * 0.6), y);
     ctx.stroke();
   }
 
