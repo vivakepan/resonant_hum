@@ -65,6 +65,9 @@ test -f "$TMP/journal/"*.md
 echo "== Synthetic ML (numpy) =="
 (cd tools/synthetic_sessions && python3 train.py --data sessions.jsonl >/dev/null)
 
+echo "== §9 Field interference beat tests =="
+python3 tools/verify_field_beats.py
+
 echo "== esbuild bundle =="
 npx --yes esbuild src/main.js --bundle --format=iife --target=es2020 --outfile="$TMP/_bundle.js" >/dev/null
 test -s "$TMP/_bundle.js"

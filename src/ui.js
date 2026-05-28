@@ -328,6 +328,7 @@ function wireBreathControls(breath, state) {
   toggleBtn.addEventListener('click', () => {
     const next = !breath.enabled;
     breath.setEnabled(next);
+    state.breathEnabled = next;
     toggleBtn.classList.toggle('on', next);
   });
 

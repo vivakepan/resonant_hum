@@ -71,6 +71,50 @@ export function drawZone(ctx, W, H, z, amp, driveF, time) {
 }
 
 
+// ─── Large-cavity region rendering (§12.6) ────────────────────
+// Skull and chest span physical areas, not single points. When active they
+// get a region-fill glow matching the anatomy outlines, drawn behind vagus
+// and zone dots so those still read on top.
+
+export function drawRegions(ctx, W, H, zones, amps) {
+  zones.forEach((z, i) => {
+    const amp = amps[i];
+    if (amp < 0.08) return;
+    if (z.id === 'skull') {
+      // Cranial ellipse glow — matches anatomy.js skull stroke exactly.
+      const cx = W * 0.50, cy = H * 0.205;
+      const rx = W * 0.085, ry = H * 0.115;
+      ctx.save();
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx * 1.9, ry * 1.9, 0, 0, Math.PI * 2);
+      const eg = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(rx, ry) * 1.9);
+      eg.addColorStop(0,   hexA(z.color, 0.22 * amp));
+      eg.addColorStop(0.55, hexA(z.color, 0.10 * amp));
+      eg.addColorStop(1,   hexA(z.color, 0));
+      ctx.fillStyle = eg;
+      ctx.fill();
+      ctx.restore();
+    } else if (z.id === 'chest') {
+      // Ribcage bezier region fill — matches anatomy.js chest cavity path.
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(W * 0.36, H * 0.50);
+      ctx.quadraticCurveTo(W * 0.32, H * 0.78, W * 0.40, H * 0.92);
+      ctx.lineTo(W * 0.60, H * 0.92);
+      ctx.quadraticCurveTo(W * 0.68, H * 0.78, W * 0.64, H * 0.50);
+      ctx.closePath();
+      const eg = ctx.createRadialGradient(W * 0.50, H * 0.71, 0, W * 0.50, H * 0.71, H * 0.22);
+      eg.addColorStop(0,   hexA(z.color, 0.18 * amp));
+      eg.addColorStop(0.6, hexA(z.color, 0.07 * amp));
+      eg.addColorStop(1,   hexA(z.color, 0));
+      ctx.fillStyle = eg;
+      ctx.fill();
+      ctx.restore();
+    }
+  });
+}
+
+
 // ─── Whole-system aura ─────────────────────────────────────────
 // Golden glow that fills the canvas when system amplitude exceeds
 // the coupling threshold.
@@ -142,7 +186,7 @@ export function drawAntiResonance(ctx, W, H, ar, strength, time) {
   ctx.textAlign = 'left';
   const lx = mx + 24, ly = my - 4;
   ctx.fillStyle = `rgba(200,170,255,${0.95 * strength})`;
-  ctx.fillText('◊ ANTI-RESONANCE NODE', lx, ly);
+  ctx.fillText('◊ SPECTRAL NULL', lx, ly);
   ctx.fillStyle = `rgba(180,140,255,${0.65 * strength})`;
   ctx.fillText(`${a.name.toUpperCase()} ⇌ ${b.name.toUpperCase()}`, lx, ly + 11);
   ctx.fillText(`${ar.f.toFixed(0)} Hz · phase π`, lx, ly + 22);
@@ -157,14 +201,14 @@ export function drawAntiResonance(ctx, W, H, ar, strength, time) {
 
 // ─── Badge + system state update ───────────────────────────────
 
-export function updateBadge(sysAmp, activeCount, arActive) {
+export function updateBadge(sysAmp, activeCount, arActive, spatialNode = false) {
   const badge = document.getElementById('badge');
   const sysStateEl = document.getElementById('sysState');
 
   if (arActive && arActive.strength > 0.45) {
     const aName = arActive.ar.a.name.split(' ')[0].toUpperCase();
     const bName = arActive.ar.b.name.split(' ')[0].toUpperCase();
-    badge.textContent = `◊ ANTI-RESONANCE · ${aName} ⇌ ${bName}`;
+    badge.textContent = `◊ SPECTRAL NULL · ${aName} ⇌ ${bName}`;
     badge.className = 'resonance-badge anti';
     sysStateEl.textContent = 'PHASE CANCELLATION';
     sysStateEl.style.color = '#b48cff';
@@ -173,6 +217,11 @@ export function updateBadge(sysAmp, activeCount, arActive) {
     badge.className = 'resonance-badge full';
     sysStateEl.textContent = 'FULL HARMONIC LOCK';
     sysStateEl.style.color = '#ffe07a';
+  } else if (spatialNode) {
+    badge.textContent = '◊ SPATIAL NODE';
+    badge.className = 'resonance-badge spatial';
+    sysStateEl.textContent = 'FIELD CANCELLATION';
+    sysStateEl.style.color = '#8cc8ff';
   } else if (sysAmp > 0.35 || activeCount >= 3) {
     badge.textContent = 'HARMONIC COUPLING';
     badge.className = 'resonance-badge high';

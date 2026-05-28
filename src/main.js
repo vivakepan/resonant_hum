@@ -7,8 +7,8 @@
  */
 
 import { zones, zoneResponse, applyCoupling, activeAntiResonance, primaryF } from './physics.js';
-import { createParticles, drawSilhouette, drawVocalFolds, drawVagus } from './anatomy.js';
-import { drawZone, drawSystemAura, drawAntiResonance, updateBadge } from './renderer.js';
+import { createParticles, drawSilhouette, drawVocalFolds, drawVagus, drawBreathTrace } from './anatomy.js';
+import { drawZone, drawSystemAura, drawAntiResonance, drawRegions, updateBadge } from './renderer.js';
 import { createZoneBars, updateZoneBars, wireControls } from './ui.js';
 import { computeField, drawField, sampleField } from './field.js';
 import { AudioEngine } from './audio.js';
@@ -17,6 +17,7 @@ import { applyViewScale } from './views.js';
 import { envDriver, applyEnvFloor } from './env.js';
 import { createSessionRecorder } from './sessions.js';
 import { loadArticulation, articulationHint } from './articulation.js';
+import { NoticeEngine } from './notices.js';
 
 
 // ─── Canvas setup ──────────────────────────────────────────────
@@ -93,6 +94,7 @@ const ui        = wireControls(state, audio, breath);
 
 state.sessionRecorder = createSessionRecorder(state, zones);
 loadArticulation().then(doc => { state.articulationDoc = doc; });
+const notices = new NoticeEngine();
 
 
 // ─── Animation loop ────────────────────────────────────────────
@@ -168,13 +170,24 @@ function frame(now) {
   // 3. First-order low-pass each zone toward its target (per-zone tau).
   // 4. Apply coupling on the dynamic state for the rendered amplitudes.
   const pf      = primaryF(state.drivers);
+  let spatialNodeActive = false;
   const target  = zones.map(z => {
     let t = zoneResponse(z, allDrivers);
     t = applyViewScale(z, t, state.viewMode);
-    if (field) {
-      const s = Math.abs(sampleField(field, z.nx, z.ny));
-      const fieldGain = Math.min(0.35, s * 0.20);
-      t = Math.min(1, t * (1 + fieldGain));
+    if (field && field.maxA > 0.04) {
+      // §5a step 5 / AIN-RS-004 (spatial-node half): the field is the truth,
+      // zones report it. The local sample modulates the zone bidirectionally —
+      // an antinode brightens (up to +35%), a spatial node dims (down to −35%)
+      // *even if the zone's raw response would otherwise fire*. Modulation is
+      // centered on the cell's |A| relative to the field's current maxA, so
+      // the no-externals → field-is-no-op invariant from computeField (maxA=0
+      // → guard above) is preserved exactly.
+      const sNorm = Math.abs(sampleField(field, z.nx, z.ny)) / field.maxA;  // 0..1
+      const mod   = 0.65 + 0.70 * sNorm;  // 0.65 at a node, 1.35 at an antinode
+      // AIN-RS-004 (β): a zone with strong raw response sitting at a field node
+      // (sNorm < 0.25) is a spatial-node suppression event — badge it distinctly.
+      if (t > 0.4 && sNorm < 0.25) spatialNodeActive = true;
+      t = Math.min(1, t * mod);
     }
     return t;
   });
@@ -201,6 +214,8 @@ function frame(now) {
   // body-mask clipped, antinode-threshold emphasized.
   if (field) drawField(ctx, W, H, field);
 
+  drawRegions(ctx, W, H, zones, amps);
+
   // Vagus particles slow at inhale-top, speed at exhale-mid.
   const vagusGain = 0.35 + 0.65 * breathEnv;
   drawVagus(ctx, W, H, state.vt, sysAmp, particles, state.timeScale * vagusGain);
@@ -212,13 +227,17 @@ function frame(now) {
   }
 
   drawVocalFolds(ctx, W, H, pf, state.vt);
+  drawBreathTrace(ctx, W, H, breathEnv, breath.mode, state.breathEnabled, state.vt, breath.periodMs);
 
   // ── UI updates ──
   updateZoneBars(rowEls, amps);
-  updateBadge(sysAmp, activeCount, arActive);
+  updateBadge(sysAmp, activeCount, arActive, spatialNodeActive);
   const badge = document.getElementById('badge');
   const hint = articulationHint(state.articulationDoc, sysAmp, activeCount);
   if (hint) badge.title = hint;
+  const noticeText = notices.tick({ realT: Date.now(), sysAmp, activeCount, arActive, spatialNode: spatialNodeActive });
+  const noticeEl = document.getElementById('notice');
+  if (noticeEl) noticeEl.textContent = noticeText || '';
   const externalFs = state.externalDrivers.map(d => d.f);
   state.sessionRecorder.sample(sysAmp, activeCount, arActive, pf, amps, externalFs);
   ui.updateBreathDisplay(state.vt);

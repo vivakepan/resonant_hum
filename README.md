@@ -1,226 +1,220 @@
-# The Resonant Singer
+# Resonant Singer
 
-> A visual tuner — for resonance, not pitch.
-
-An interactive study in **coupled oscillators**, rendered on a body silhouette. Drag the slider through 70–900 Hz, hum into the mic, or load a song — and watch how internal hum and external pitch meet inside the form. Some frequencies wake the whole body. Some land in dead zones. **Spectral nulls** (◊-marked presets) suppress paired zones below baseline; with two active sources, the **interference field** adds **spatial nodes** where waves cancel in space.
-
-The project is **half instrument, half research system**: a browser physics simulation of vocal-cranial resonance phenomenology, plus offline tooling (relational graph, synthetic ML, journal-noticer) and living **Methodology v1.2** registries. It is **not** a clinical model, wellness product, or recommendation engine.
-
-Parent research program: [Methodology v1.2](docs/methodology/README.md) · Presence Engine v2.2 (relational morphism graph, deferred closure, neti-neti elimination).
+**A browser visualization of vocal-cranial resonance as a system of coupled oscillators.** Ten anatomical zones (chest → skull), two-source interference field, breath-modulated autonomic rhythm, offline morphism graph pipeline — all built to a discipline that registers what the model doesn't know at least as carefully as what it does.
 
 ---
 
-## Project scope (complete system)
+## Why this exists (the epistemic claim)
 
-| Layer | Component | Location |
-|-------|-----------|----------|
-| **Browser instrument** | Zone physics, coupling, dual anti-resonance, field, breath, audio (mic + file), five view modes, environmental interference, multi-driver | `src/` · `index.html` |
-| **Portable build** | Single-file bundle for `file://` use | `dist/vocal_resonance.html` (rebuild from `src/` when releasing) |
-| **Relational graph** | Ingest → homology → neti-neti → passive articulation | `tools/graph_engine/` |
-| **Controlled ML** | Synthetic sessions from known physics; feature vs CNN lesson | `tools/synthetic_sessions/` |
-| **Journal-noticer** | Fixed-pipeline weekly aggregate reports (nulls first-class) | `tools/journal_noticer/` · [design](docs/JOURNAL_NOTICER_DESIGN.md) |
-| **Methodology** | Assumptions, AINs, isomorphic mappings | `docs/methodology/` |
-| **Engine tier** | Staged 3D / MetaSounds / spatial audio capability map | [docs/ENGINE_ROADMAP.md](docs/ENGINE_ROADMAP.md) |
-| **v1 reference** | Earlier monolithic shipped draft (mic-heavy UX parity source) | See [Versions](#versions-v1--v2) |
+Most interactive resonance tools either perform clinical measurements or sell wellness metaphysics. This is neither. It is a **research artifact with explicit uncertainty quantification**: 15 registered Active Ignorance Nodes naming exactly where the model's assumptions outrun its warrant; an offline ML pipeline explicitly designed against feedback-loop failure modes; a morphism graph layer that rejects surface-similar session patterns via zone-identity permutation testing before emitting any articulation.
+
+The audio privacy architecture refuses to transmit MFCCs or mel-spectrograms because they are invertible to intelligible speech. The visualization explicitly distinguishes between spectral nulls (resonator system property) and spatial nodes (wave geometry property) — a distinction most two-source field visualizations collapse. Every zone frequency carries an `evidence` field declaring whether it's `cited`, `pending`, or `phenomenological`.
+
+If you are building something at the intersection of biofeedback, ML, and embodied experience, the architecture here — not the acoustic model — is the primary contribution.
 
 ---
 
-## What's in the browser
+## What it is
 
-### Physics (three composed layers)
+A Canvas 2D browser application running at 60fps, zero dependencies, that ships as a single static HTML file (`dist/vocal_resonance.html`). It models the body as a coupled-oscillator system:
 
-1. **Zones** — Ten anatomical resonators with harmonic stacking in cents space (h = 1…8, falloff h^0.55), **anatomical adjacency coupling**, multi-modal cavities (chest, skull) with per-mode `evidence` fields, and four **spectral null** notches at geometric means between adjacent pairs.
-2. **Field** — Two-source wave superposition: internal source at the **larynx**, external peaks from uploaded audio at **skull-top** (*visualization geometry, not anatomy*). Zones sample the field; external balance at zero collapses the field to a no-op.
-3. **Breath** — Synthesized envelope (default), tap-to-breathe (spacebar), or mic-derived RMS modulation. Modulates internal amplitude, vagus flow, aura, and chest sway.
+- **10 anatomical zones** — chest, trachea, pharynx, mouth, nasal, skull, inner-ear, larynx, heart, abdomen — each defined by natural frequency modes with Q factors and evidence status
+- **Internal source** — the singer's frequency (slider, mic, or sweep), positioned at the larynx
+- **External source** — a loaded audio file (FFT peak extraction), radiating from skull-top
+- **Two-source interference field** — 48×60 grid wave superposition; zones sample the field and report it
+- **Breath layer** — synthesized cosine envelope (~5s period) modulates internal amplitude and vagus particle velocity
+- **Spectral null presets** — four ◊ buttons at geometric-mean anti-resonance frequencies between adjacent zone pairs
+- **Offline morphism graph** — Python pipeline: ingest → typed-path Jaccard homology → neti-neti permutation test → read-only articulation
 
-### Time and drivers
+---
 
-- `drivers[]` model: internal slider (or **mic pitch** via on-device FFT), pinned chord stacks (**MULTI**), external song peaks (K = 1…5), environmental presets (**ENV**).
-- Per-zone first-order envelopes (Q-dependent attack/decay).
+## Shipped modules
 
-### Recognition stances (five view modes)
+| Module | File | What it does |
+|--------|------|--------------|
+| Physics | `src/physics.js` | 10 zones with `modes[]`, anatomical adjacency coupling, anti-resonance pairs, `zoneResponse`, `applyCoupling`, `primaryF` |
+| Field | `src/field.js` | 48×60 interference grid, `computeField`, `sampleField`, `drawField`, body-mask clipping |
+| Audio | `src/audio.js` | Web Audio FFT, microphone pitch extraction, song-file peak extraction (K≤5), `echoCancellation: false` |
+| Breath | `src/breath.js` | Synthesized cosine, mic-RMS, and tap-to-breathe modes; `envelope(vt)` |
+| Anatomy | `src/anatomy.js` | Silhouette, vocal folds, vagus particles, breath trace, heart glyph |
+| Renderer | `src/renderer.js` | Zone glows, system aura, field layer, region fills, anti-resonance nodes, `updateBadge` with spectral-null / spatial-node / whole-system states |
+| UI | `src/ui.js` | Slider (70–3000 Hz), presets, sweep, speed, multi-pin, external balance, breath controls |
+| Views | `src/views.js` | Five view stances (organs/flow/nerves/solid/em) scaling zone weights |
+| Env | `src/env.js` | Envelope driver profiles (none/chest/skull/whole) |
+| Sessions | `src/sessions.js` | Opt-in JSONL export: `{t, internal_f, external_fs, amps[10], sysAmp, arActive}` |
+| Articulation | `src/articulation.js` | Loads `articulation.json` from offline pipeline; enriches badge tooltip with seeded openings fallback |
+| Notices | `src/notices.js` | Rule-based state machine: sustained-state detection → past-tense notice text; SUSTAINED=3s, DISPLAY=6s, COOLDOWN=15s; never recommendations |
 
-Same physics, different visual weighting: **Organs** · **Flow** · **Nerves** · **Solid** · **EM**. Canvas strip below the silhouette; caption updates per stance.
+---
 
-### Audio (on-device only)
+## Offline pipeline
 
-- **LISTEN · MIC** — `getUserMedia` with analysis-friendly constraints; dominant peak drives the internal source. No raw audio transmitted.
-- **Song panel** — File upload → FFT peaks → external drivers + optional **FIELD** overlay.
-- Design rationale: [docs/AUDIO_PIPELINE_DESIGN.md](docs/AUDIO_PIPELINE_DESIGN.md) (hand DSP for hum; ML held in reserve).
+```
+browser EXPORT SESSION
+       ↓
+sessions.jsonl
+       ↓
+tools/graph_engine/ingest.py      → SQLite graph.db (typed nodes + morphisms)
+tools/graph_engine/homology.py    → typed-path Jaccard similarity candidates (τ=0.55)
+tools/graph_engine/neti_neti.py   → zone-identity permutation test (50 trials); rejects surface-similar matches
+tools/graph_engine/articulate.py  → articulation.json (past-tense recognition + revealed opening pairs)
+       ↓
+browser loads articulation.json → badge tooltip enriched
+```
 
-### Rendering
+Additional tools:
 
-Canvas 2D @ 60 fps — motion trails, clipped additive interference layer, vagus particles, heartbeat overlay, vocal-fold flutter, system badge. Speed **RATE** 0.25×–4× scales visualization only.
+- `tools/synthetic_sessions/` — synthetic session generator + logistic regression classifier (87% accuracy over zone-activation features; reference implementation for "synthetic data first" discipline)
+- `tools/journal_noticer/` — append-only aggregate noticer; mandatory null-week output; holdout control group; no weight training on user behavior
+- `tools/verify_all.sh` — pre-release suite: JS syntax, zone-list parity, DOM audit, graph schema smoke, journal noticer, synthetic ML, §9 field interference beat tests, esbuild bundle
 
-### Research hooks (browser)
+---
 
-- **EXPORT SESSION** — Opt-in JSONL for `tools/graph_engine/ingest.py` and `tools/journal_noticer/`.
-- Optional **`articulation.json`** — Passive badge tooltip enrichment from `tools/graph_engine/articulate.py` ([`src/articulation.js`](src/articulation.js)).
+## What's staged (not shipped)
+
+| Capability | Where it lives | What would unlock it |
+|------------|---------------|----------------------|
+| YIN/MPM pitch detector in AudioWorklet | `docs/AUDIO_PIPELINE_DESIGN.md` | Replace FFT peak-pick for live mic; ~100 lines of DSP |
+| Three.js volumetric field | `docs/ENGINE_ROADMAP.md` | Nodal surfaces you can fly through; keeps browser shareability |
+| Real user session corpus | `docs/methodology/active_ignorance_nodes.md` AIN-RS-003 | Opt-in journal-noticer aggregate + holdout group |
+| Citation promotion (`phenomenological` → `cited`) | `src/physics.js` `modes[].evidence` | Quarterly literature review of zone frequencies |
+| ML feedback loop closure (AIN-RS-008) | `tools/synthetic_sessions/` | In-browser classifier loading + notice integration |
+| Spatial articulation calibration | AIN-RS-014 | Real session corpus + tuned similarity thresholds |
+
+---
+
+## Active Ignorance Nodes
+
+An AIN is a registered gap: a place where the model's assumptions outrun its warrant. They are tracked because hidden gaps are more dangerous than acknowledged ones.
+
+| AIN | Description | Status |
+|-----|-------------|--------|
+| AIN-RS-001 | Zone natural frequencies are unverified against bodies | PARTIALLY RESOLVED — `evidence` field now uniform across all modes; citations pending |
+| AIN-RS-002 | Coupling kernel was Euclidean pixel distance | RESOLVED — replaced with anatomical adjacency graph (13 named air/tissue/bone edges) |
+| AIN-RS-003 | No felt-sense ground truth for badge thresholds | ACTIVE — requires opt-in journal-noticer with holdout group |
+| AIN-RS-004 | Two anti-resonance phenomena conflated | PARTIALLY RESOLVED — spectral null (α) and spatial node (β) now distinct in badge, canvas label, and docs |
+| AIN-RS-005 | Single-driver assumption baked into UI and physics | RESOLVED — state is now `drivers: Driver[]`; all physics accepts driver arrays |
+| AIN-RS-006 | Time was decorative, not phenomenological | PARTIALLY RESOLVED — first-order per-zone envelopes with Q-dependent tau; full ODE deferred |
+| AIN-RS-007 | Breath was missing entirely | RESOLVED — `src/breath.js`, three modes (synth/mic/tap), modulates internal source and vagus |
+| AIN-RS-008 | ML scaffold doesn't connect to artifact | ACTIVE — trained model never loaded in browser; offline pipeline only |
+| AIN-RS-009 | Methodology registries absent from repo | RESOLVED — `docs/methodology/` with assumptions, AINs, isomorphic mappings |
+| AIN-RS-010 | "Resonance" collapses acoustic/phenomenological/metaphorical senses | ACTIVE — three senses distinct in docs; badge means the acoustic threshold |
+| AIN-RS-011 | Wave amplitude omits 1/r falloff | ACTIVE — deliberate simplification; flagged in field docs |
+| AIN-RS-012 | Multi-modal zone frequencies need citation discipline | PARTIALLY RESOLVED — `evidence` field per mode; chest/skull modes `pending`; no `cited` yet |
+| AIN-RS-013 | Source-position geometry is artistic, not anatomical | RESOLVED — UI tooltip and docs disclaimer shipped |
+| AIN-RS-014 | Relational-graph ML layer absent | PARTIALLY RESOLVED — offline scaffold ships; browser ingest + articulation loader land; thresholds untuned |
+| AIN-RS-015 | Is synthesized breath enough to embody the visualization? | ACTIVE — empirical question; requires three-condition journal-noticer study |
+
+Full detail: [`docs/methodology/active_ignorance_nodes.md`](docs/methodology/active_ignorance_nodes.md)
+
+---
+
+## Two phenomena not to conflate
+
+The left-rail ◊ buttons and the `◊ SPATIAL NODE` badge fire from **physically different mechanisms**:
+
+| Kind | Mechanism | Source |
+|------|-----------|--------|
+| **Spectral null (α)** | Geometric-mean notch in zone transfer function — property of the resonator system | `antiResonanceFactor` in `physics.js`; ◊ presets |
+| **Spatial node (β)** | Field cancellation at interference grid point — property of wave geometry when two sources are active | `field.js` + `sampleField` in `main.js` |
+
+A zone can sit at a spatial node (β) even when its raw resonant response is high — the field suppresses it. These are not alternative names for the same thing.
+
+---
+
+## Honesty notes (load-bearing)
+
+These are not disclaimers added to avoid liability. They are part of the model.
+
+1. **"Song enters at the top of the skull"** is **visualization geometry, not acoustics.** A song reaches the body via air pressure at both ears. The skull-top position makes the interference geometry legible — internal source rises from the larynx, external descends from above, the meeting region falls inside the zone array. The UI song panel shows this as a tooltip footnote.
+
+2. **Phase coherence between sources is assumed.** Real-world phase relationships between a hum and a song are arbitrary. The visualization is a "what if these were locked" structural geometry, not a recording of what's happening in a room.
+
+3. **1/r amplitude falloff is omitted.** The field uses constant-amplitude waves. Near-source intensities are overestimated relative to far-source; beat patterns are visually exaggerated relative to measurement. Registered as AIN-RS-011.
+
+4. **The badge threshold is arithmetic, not phenomenological.** `WHOLE-SYSTEM RESONANCE` fires at `sysAmp > 0.55 && activeCount ≥ 5`. Whether a user feels anything at that threshold is unknown (AIN-RS-003).
+
+5. **No clinical claim.** This is not a medical device, biofeedback instrument, or wellness tool. It is a physics model displayed on a canvas.
+
+---
+
+## Methodology discipline
+
+The epistemic architecture borrows structure from two external documents (*Methodology v1.2* and *Presence Engine v2.2*) — not their subject matter. The mappings:
+
+| Parent concept | Resonant Singer instance |
+|----------------|--------------------------|
+| Active Ignorance Node | Zone frequency / coupling edge that's hand-tuned but unverified |
+| Isomorphic enrichment | Helmholtz resonator math, two-source interference physics, room acoustics |
+| Deferred closure | Don't label a session as resonant without independent structural warrant |
+| Morphism graph | Songs × zones × sessions × events as relational typed nodes |
+| Neti-neti elimination | Strip zone labels — is this pattern structurally like that pattern, or just surface-similar? |
+| Anti-recommendation | Past-tense only: "chest+heart co-fired in 14 sessions", never "try shifting your pitch down 8 Hz" |
+
+The ML pipeline design discipline (append-only aggregate, holdout control group, no weight training on user behavior) implements patterns from Hadfield-Menell 2017 (reward misspecification) and citizen-science aggregation practice at the product level.
+
+Full registries: [`docs/methodology/`](docs/methodology/)
+
+---
+
+## Design-choice audit (key decisions)
+
+| Choice | Alternative | Why this wins |
+|--------|-------------|---------------|
+| Canvas 2D | WebGL / Three.js | Zero-dep, one-click distribution, single-file build. Three.js is staged for the 3D tier, not now. |
+| 48×60 field grid | 64×80 / 32×40 | Headroom for low-end laptops at K=1; visually sufficient for antinode-line emphasis |
+| K=1 dominant pitch (default) | Top-K peaks | Legibility on dense songs; K≤5 available as power-user toggle |
+| Field layer: `composite='lighter'`, α≈0.18 | `'screen'`, `'overlay'` | Pure additive; predictable under varying field intensity; never darkens zones |
+| Anatomical adjacency coupling | Euclidean Gaussian | Physically motivated; prevents larynx leaking into skull on pixel proximity |
+| Articulation surface: strictly passive | Recommendation surface | System reports past observations; user leads exploration. Hard constraint. |
+| Local SQLite offline pipeline | Browser-side IndexedDB | Zero browser dependency; privacy-preserving; matches journal-noticer stance |
+| `evidence` field per zone mode | Implicit citation | Makes the epistemics inspectable; flags `phenomenological` for review |
+
+---
+
+## Docs index
+
+| Document | What it covers |
+|----------|---------------|
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | All 12 modules, data flow, rendering pipeline |
+| [`docs/INTERFERENCE_MODE_DESIGN.md`](docs/INTERFERENCE_MODE_DESIGN.md) | Two-source field design rationale, dual anti-resonance distinction |
+| [`docs/AUDIO_PIPELINE_DESIGN.md`](docs/AUDIO_PIPELINE_DESIGN.md) | Web Audio architecture, YIN/MPM vs. FFT, privacy architecture |
+| [`docs/ENGINE_ROADMAP.md`](docs/ENGINE_ROADMAP.md) | Canvas 2D → Three.js → UE5 capability tiers |
+| [`docs/VERIFICATION.md`](docs/VERIFICATION.md) | Manual checks, automated suite, graph engine verification |
+| [`docs/JOURNAL_NOTICER_DESIGN.md`](docs/JOURNAL_NOTICER_DESIGN.md) | Append-only aggregate design, holdout group, anti-recommendation discipline |
+| [`docs/methodology/README.md`](docs/methodology/README.md) | Four-tier mapping classification, alignment metric |
+| [`docs/methodology/assumptions.md`](docs/methodology/assumptions.md) | 12 active assumptions with falsification conditions |
+| [`docs/methodology/active_ignorance_nodes.md`](docs/methodology/active_ignorance_nodes.md) | All 15 AINs, current status, blast radius |
+| [`docs/methodology/isomorphic_mappings.md`](docs/methodology/isomorphic_mappings.md) | Cross-domain mappings with tier classification |
+| [`tools/graph_engine/README.md`](tools/graph_engine/README.md) | Pipeline quick-start, discipline rules, PE v2.2 mapping |
+| [`vibrational-system.md`](vibrational-system.md) | Mechanics + philosophy of vibration and resonance in the human body |
+| [`essay-draft.md`](essay-draft.md) | Phenomenological essay on vocal resonance and the felt sense |
 
 ---
 
 ## Quick start
 
 ```bash
-cd resonant-singer
-python3 -m http.server 8000
-# open http://localhost:8000
-```
+# Dev server (modular, HMR-friendly)
+npm run serve            # or: python3 -m http.server 8080
 
-Or: `npm start`
+# Pre-release verification
+./tools/verify_all.sh    # JS, zone parity, DOM audit, graph smoke, §9 field tests, esbuild
 
-**Portable:** `npm run build:dist` → open `dist/vocal_resonance.html` for `file://` without a server. Run `npm run verify` first.
+# Portable single-file build
+npm run build:dist       # writes dist/vocal_resonance.html (~87 KB, no server needed)
 
----
-
-## Try this
-
-1. **A3 · 220** — larynx fundamental baseline.
-2. **SWEET · 262** — harmonic stacking (chest + skull without a peak at 262 Hz).
-3. **◊ DEAD · 355** — spectral null between pharynx and mouth.
-4. **LISTEN · MIC** — hum; watch the internal driver track pitch.
-5. Load a song → **PLAY** → tune **EXT BAL** and **FIELD** — spatial interference structure.
-6. **MULTI** + two presets — chord-style multi-driver stacking.
-7. **ENV** — cycle mains / HVAC / traffic interference floors.
-8. Switch **view modes** (Organs → Flow → Nerves …).
-9. **EXPORT SESSION** → run the offline pipelines below.
-
----
-
-## Offline pipelines
-
-### Relational graph (Presence-Engine-aligned)
-
-```bash
+# Offline pipeline (after EXPORT SESSION in browser)
 cd tools/graph_engine
 python3 ingest.py path/to/sessions.jsonl
 python3 homology.py
 python3 neti_neti.py
-python3 articulate.py   # → articulation.json for the browser
-```
+python3 articulate.py    # → articulation.json; drop in repo root for browser enrichment
 
-Rules: no PII, no cloud, past-tense articulation only, homological morphisms gated by neti-neti. See [tools/graph_engine/README.md](tools/graph_engine/README.md).
-
-### Synthetic sessions (controlled ML)
-
-```bash
+# Synthetic ML (reference implementation)
 cd tools/synthetic_sessions
 python3 generate.py -n 4000 --balance -o sessions_balanced.jsonl
 python3 train.py --data sessions_balanced.jsonl
 ```
 
-If you change `src/physics.js`, update `physics.py`. See [tools/synthetic_sessions/README.md](tools/synthetic_sessions/README.md).
-
-### Journal-noticer
-
-```bash
-cd tools/journal_noticer
-python3 noticer.py --sessions path/to/sessions.jsonl --out journal/
-```
-
-Fixed analysis — **no training on user behavior**. See [docs/JOURNAL_NOTICER_DESIGN.md](docs/JOURNAL_NOTICER_DESIGN.md).
-
----
-
-## Project structure
-
-```
-resonant-singer/
-├── index.html
-├── styles/main.css
-├── src/
-│   ├── physics.js          Zones, modes, adjacency, spectral nulls, drivers[]
-│   ├── field.js            Two-source interference grid
-│   ├── audio.js            Mic + file FFT peaks
-│   ├── breath.js           Breath envelope (synth / tap / mic)
-│   ├── views.js            Five recognition stances
-│   ├── env.js              Environmental interference presets
-│   ├── sessions.js         Opt-in session export
-│   ├── articulation.js     Passive badge enrichment
-│   ├── anatomy.js · renderer.js · ui.js · main.js
-├── docs/
-│   ├── README.md              Documentation index
-│   ├── ARCHITECTURE.md
-│   ├── GLOSSARY.md · VERIFICATION.md
-│   ├── AUDIO_PIPELINE_DESIGN.md
-│   ├── INTERFERENCE_MODE_DESIGN.md
-│   ├── JOURNAL_NOTICER_DESIGN.md
-│   ├── ENGINE_ROADMAP.md
-│   ├── essay-draft.md
-│   ├── vibrational-system.md
-│   └── methodology/
-├── tools/
-│   ├── synthetic_sessions/
-│   ├── graph_engine/
-│   └── journal_noticer/
-└── dist/vocal_resonance.html
-```
-
-Documentation index: [docs/README.md](docs/README.md) · Technical deep-dive: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
-
----
-
-## Versions: v1 → v2
-
-| | **v1** (first shipped monolith) | **v2** (this repository) |
-|---|--------------------------------|----------------------------|
-| Delivery | Single `vocal_resonance.html` | ES modules + Python tools + methodology |
-| Physics | Pixel-distance coupling | Anatomical adjacency graph, multi-modal zones |
-| Anti-resonance | Spectral notches | Spectral nulls + spatial field nodes |
-| Audio | Mic + file + multi-peak | Mic + file + field + breath (integrated) |
-| ML / aggregate | — | Graph engine, synthetic sessions, journal-noticer |
-| Discipline | — | Living AIN / assumption registries |
-
-v1 remains a valid reference for exploratory UX; v2 is the formal research instrument.
-
----
-
-## Verification
-
-| Check | Validates |
-|-------|-----------|
-| `train.py` ±2 pp after physics edits | Generative labels stable |
-| Sustained preset → zone envelope plateau | AIN-RS-006 envelopes |
-| Sine WAV + internal harmonic → field beats | Wave summation |
-| Neti-neti controlled-construction test | Rejects chest-only homology |
-| Breath on → vagus/aura/chest at breath period | Breath layer |
-
-Dev console: `window.__rs` → `{ state, audio, zones }`.
-
----
-
-## What this demonstrates
-
-- Signal processing, coupled oscillators, Canvas 2D systems design
-- On-device audio analysis with explicit privacy boundaries
-- Relational ML alternative to behavioral training (graph + neti-neti + passive articulation)
-- Methodology v1.2 operational discipline (assumptions, falsification, active ignorance)
-- Staged engine roadmap for deeper embodiment ([ENGINE_ROADMAP](docs/ENGINE_ROADMAP.md))
-
-## What this is not
-
-- Clinically validated biomechanics or phase-exact anti-resonance math
-- A frequency-healing or wellness-grift product
-- An LLM coach or recommender (articulation and journal are **past-tense reporters**)
-
----
-
-## Tiered audience
-
-- **Floor:** slider, mic, or song — no reading required.
-- **Middle:** panels, ◊ presets, view modes — learn *placement* visually.
-- **Deep:** architecture, methodology, fork physics, run graph + synthetic + noticer pipelines.
-
-Essay: [docs/essay-draft.md](docs/essay-draft.md) · Vibrational system (standalone): [docs/vibrational-system.md](docs/vibrational-system.md).
-
----
-
-## License
-
-MIT.
-
----
-
-## Credit
-
-Built by **Vivake Pandey**. Physics, visualization, methodology registries, and tooling are original. Structural discipline inherits from Methodology v1.2 and Presence Engine v2.2.
+Dev hook: `window.__rs → { state, audio, zones }` — available in any console session.

@@ -67,6 +67,23 @@ python3 noticer.py --sessions path/to/sessions.jsonl --out journal/
 
 ---
 
+## Automated (pre-release)
+
+Run from repo root: `./tools/verify_all.sh`
+
+Checks run in order:
+1. JS syntax — `node --check` on all `src/*.js`
+2. Zone list parity — `physics.js` zone IDs match `tools/graph_engine/zones.py`
+3. DOM id audit — all `getElementById` calls have matching `id=` in `index.html`
+4. Graph ingest schema — `verify_ingest_schema.py` smoke test
+5. Graph pipeline smoke — ingest → homology → neti_neti → articulate on a synthetic session
+6. Journal-noticer — produces dated markdown output
+7. Synthetic ML (numpy) — `train.py` runs without error
+8. **§9 Field interference beat tests** — `tools/verify_field_beats.py`: Python port of `field.js computeField()`, 6 tests confirming genuine interference geometry (node/antinode structure, bipolarity, superposition, frequency scaling)
+9. esbuild bundle — single-file build completes and is non-empty
+
+---
+
 ## Portable bundle
 
 ```bash

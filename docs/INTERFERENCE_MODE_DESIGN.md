@@ -51,7 +51,7 @@ Counter-propagating waves produce standing patterns. **Honesty:** a song reaches
 | **Spectral null (α)** | Geometric-mean notches in zone transfer | ◊ presets, `antiResonanceFactor` |
 | **Spatial node (β)** | Field cancellation at grid points | `field.js` when externals active |
 
-See [GLOSSARY.md](GLOSSARY.md).
+See [README.md §3 AIN-RS-004](../README.md) for the do-not-conflate discipline.
 
 ---
 

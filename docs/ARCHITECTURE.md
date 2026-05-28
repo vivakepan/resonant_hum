@@ -1,8 +1,8 @@
 # Architecture
 
-**Status:** SHIPPED (browser) · aligned with [README.md](../README.md)  
-**Implements:** `src/` · `index.html`  
-**See also:** [docs/README.md](README.md) · [GLOSSARY.md](GLOSSARY.md) · [VERIFICATION.md](VERIFICATION.md)
+**Status:** SHIPPED (browser) · aligned with [README.md](../README.md) (the Critical Analysis & Refinement Roadmap — canonical source of truth)
+**Implements:** `src/` · `index.html`
+**See also:** [VERIFICATION.md](VERIFICATION.md) · [methodology/](methodology/) (AINs, assumptions, isomorphic mappings)
 
 This document describes the physics model, rendering pipeline, module graph, and offline research stack. It is code-true for the modular browser app.
 
@@ -81,7 +81,7 @@ Per driver, per mode: scan harmonics h = 1…8 in **cents space**, Gaussian cent
 
 ### 3.3 Spectral nulls (α)
 
-Geometric mean √(f₁·f₂) between adjacent zone pairs → narrow Gaussian suppression. UI: ◊ presets on the left rail. See [GLOSSARY.md](GLOSSARY.md).
+Geometric mean √(f₁·f₂) between adjacent zone pairs → narrow Gaussian suppression. UI: ◊ presets on the left rail. Distinct from the spatial nodes in §3.4 — see [README.md §3 AIN-RS-004](../README.md) for the two-kinds-of-anti-resonance discipline.
 
 ### 3.4 Spatial nodes (β)
 
@@ -180,7 +180,7 @@ UI mutates `state` directly; no reactivity framework.
 6. **Vocal folds** — visual flutter capped for legibility.
 7. **Mic** — FFT peak, not YIN (octave errors possible in noise).
 
-Full honesty is a product requirement. See [GLOSSARY.md](GLOSSARY.md).
+Full honesty is a product requirement. See [README.md §12.2](../README.md) (wave-physics honesty notes) and [methodology/active_ignorance_nodes.md](methodology/active_ignorance_nodes.md).
 
 ---
 
