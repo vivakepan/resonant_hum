@@ -71,8 +71,10 @@ Every non-trivial PR should:
 
 ## Parent documents
 
-- `methodology_v1_2.md` — operational framework (outside this repo).
-- `PresenceEngine_v2_2.md` — morphism graph program; convergent with `tools/graph_engine/`.
+These documents are external to this repository and inform the methodology discipline:
+
+- **Methodology v1.2** — Isomorphic Enrichment, Alignment Tracking, and Active Ignorance Registry framework. Key concepts: AIN registration, four-tier mapping classification, deferred closure, the "description becomes richer, not just bigger" anti-false-closure test.
+- **Presence Engine v2.2** — Relational morphism graph architecture. Key concepts: L1 asynchronous homology detection, L2 typed morphism graph with deferred epistemic closure, L3 articulation surface (recognition + revealed opening), §7.2 neti-neti elimination test. Instantiated in this project at `tools/graph_engine/`.
 
 ---
 

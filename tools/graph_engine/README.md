@@ -8,7 +8,7 @@ This is the **§6 scaffolding** of the Resonant Singer refinement roadmap. It im
 - **Neti-neti elimination test** for surface-similar candidates (§6.3 / PE §7.2)
 - Strictly past-tense, strictly passive **articulation surface** (§6.4)
 
-It is **research-scale scaffolding**, not a production service. The components run; browser **EXPORT SESSION** feeds `ingest.py`. See [docs/README.md](../../docs/README.md) and [VERIFICATION.md](../../docs/VERIFICATION.md).
+It is **research-scale scaffolding**, not a production service. The components run; browser **EXPORT SESSION** feeds `ingest.py`. See [README.md](../../README.md) (the Critical Analysis & Refinement Roadmap — canonical source of truth) and [docs/VERIFICATION.md](../../docs/VERIFICATION.md).
 
 ---
 

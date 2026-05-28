@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Built 2026-05-27T08:31:04.833Z from src/ via tools/build_portable.mjs — file:// safe -->
+<!-- Built 2026-05-28T05:25:07.827Z from src/ via tools/build_portable.mjs — file:// safe -->
 
 <html lang="en">
 <head>
@@ -332,6 +332,16 @@ input[type="range"]::-moz-range-thumb {
 .resonance-badge.high { color: var(--gold); box-shadow: 0 0 16px rgba(255,224,122,0.4); }
 .resonance-badge.full { color: #fff; background: var(--gold); border-color: var(--gold); box-shadow: 0 0 28px var(--gold); }
 .resonance-badge.anti { color: var(--violet); border-color: var(--violet); box-shadow: 0 0 18px rgba(180,140,255,0.45); background: rgba(35,25,55,0.5); }
+.resonance-badge.spatial { color: #8cc8ff; border-color: #8cc8ff; box-shadow: 0 0 18px rgba(140,200,255,0.40); background: rgba(15,30,50,0.5); }
+
+/* ─── Passive state notice (AIN-RS-008) ──────────────────────── */
+.system-notice {
+  position: absolute; bottom: 10px; left: 28px; right: 28px;
+  font-size: 8px; letter-spacing: 0.09em; text-transform: uppercase;
+  color: rgba(120,160,180,0.60); font-family: var(--mono);
+  pointer-events: none; transition: opacity 0.8s;
+}
+.system-notice:empty { opacity: 0; }
 
 
 /* ─── View modes (main canvas) ───────────────────────────────── */
@@ -444,6 +454,7 @@ input[type="range"]::-moz-range-thumb {
   <main>
     <canvas id="c"></canvas>
     <div class="resonance-badge" id="badge">OFF-RESONANCE</div>
+    <div class="system-notice" id="notice"></div>
     <div class="view-strip" id="viewStrip">
       <button class="view-btn active" data-view="organs">Organs</button>
       <button class="view-btn" data-view="flow">Flow</button>
@@ -532,7 +543,7 @@ input[type="range"]::-moz-range-thumb {
       <span id="freqVal">220</span><span class="unit">Hz</span>
       <span class="note" id="noteName">A3</span>
     </div>
-    <input type="range" id="freq" min="70" max="900" value="220" step="0.5">
+    <input type="range" id="freq" min="70" max="3000" value="220" step="1">
     <div class="presets">
       <button class="preset-btn" data-f="98">CHEST · 98</button>
       <button class="preset-btn" data-f="220">A3 · 220</button>
@@ -540,6 +551,7 @@ input[type="range"]::-moz-range-thumb {
       <button class="preset-btn" data-f="587">SKULL · 587</button>
       <button class="preset-btn" data-f="261.6">SWEET · 262</button>
       <button class="preset-btn heart-btn" data-f="105">♥ HEART · 105</button>
+      <button class="preset-btn" data-f="2800">SINGER · 2800</button>
     </div>
     <button class="speed-btn" id="speed"><span class="lbl">RATE</span>1×</button>
     <button class="env-btn" id="env"><span class="lbl">ENV</span>NONE</button>
@@ -577,13 +589,77 @@ input[type="range"]::-moz-range-thumb {
       freq: 105,
       Q: 0.28,
       color: "#ff4d6d",
-      note: "Tracks the low-frequency tissue vibration felt NEAR the heart (anterior thoracic wall), not heart-muscle resonance. The heart pumps; it does not acoustically resonate at vocal frequencies."
+      note: "Tracks the low-frequency tissue vibration felt NEAR the heart (anterior thoracic wall), not heart-muscle resonance. The heart pumps; it does not acoustically resonate at vocal frequencies.",
+      modes: [
+        { f: 105, Q: 0.28, evidence: "phenomenological \u2014 felt low-frequency vibration in the anterior thoracic wall near the heart; not heart-muscle resonance" }
+      ]
     },
-    { id: "tracheal", name: "Tracheal column", nx: 0.5, ny: 0.62, r: 24, freq: 180, Q: 0.45, color: "#ff9550" },
-    { id: "larynx", name: "Larynx \xB7 folds", nx: 0.5, ny: 0.52, r: 18, freq: 220, Q: 0.2, color: "#ffc14a", isDriver: true },
-    { id: "pharynx", name: "Pharynx", nx: 0.5, ny: 0.45, r: 26, freq: 300, Q: 0.5, color: "#ffe07a" },
-    { id: "mouth", name: "Oral cavity", nx: 0.56, ny: 0.36, r: 32, freq: 420, Q: 0.55, color: "#8be58f" },
-    { id: "nasal", name: "Nasal / sinuses", nx: 0.51, ny: 0.3, r: 24, freq: 580, Q: 0.6, color: "#6ad7ff" },
+    {
+      id: "tracheal",
+      name: "Tracheal column",
+      nx: 0.5,
+      ny: 0.62,
+      r: 24,
+      freq: 180,
+      Q: 0.45,
+      color: "#ff9550",
+      modes: [
+        { f: 180, Q: 0.45, evidence: "phenomenological \u2014 open-tube first mode of the adult trachea (literature ranges roughly 150\u2013250 Hz depending on length and termination)" }
+      ]
+    },
+    {
+      id: "larynx",
+      name: "Larynx \xB7 folds",
+      nx: 0.5,
+      ny: 0.52,
+      r: 18,
+      freq: 220,
+      Q: 0.2,
+      color: "#ffc14a",
+      isDriver: true,
+      modes: [
+        { f: 220, Q: 0.2, evidence: "phenomenological \u2014 chosen as the comfortable adult phonation fundamental (\u2248A3); the larynx is the *driver* in this model, not a passive resonator, so Q is intentionally broad" }
+      ]
+    },
+    {
+      id: "pharynx",
+      name: "Pharynx",
+      nx: 0.5,
+      ny: 0.45,
+      r: 26,
+      freq: 300,
+      Q: 0.5,
+      color: "#ffe07a",
+      modes: [
+        { f: 300, Q: 0.5, evidence: "phenomenological \u2014 pharyngeal F1 region; published Story/Titze vocal-tract data places it in the 250\u2013400 Hz range depending on vowel shape" }
+      ]
+    },
+    {
+      id: "mouth",
+      name: "Oral cavity",
+      nx: 0.56,
+      ny: 0.36,
+      r: 32,
+      freq: 420,
+      Q: 0.55,
+      color: "#8be58f",
+      modes: [
+        { f: 420, Q: 0.55, evidence: "phenomenological \u2014 oral F2 region for open vowels; literature ranges 400\u2013800 Hz depending on tongue position" }
+      ]
+    },
+    {
+      id: "nasal",
+      name: "Nasal / sinuses",
+      nx: 0.51,
+      ny: 0.3,
+      r: 24,
+      freq: 580,
+      Q: 0.6,
+      color: "#6ad7ff",
+      modes: [
+        { f: 580, Q: 0.6, evidence: "phenomenological \u2014 paranasal Helmholtz region; maxillary sinus measurements place a primary mode near 500\u2013800 Hz with substantial individual variation" }
+      ]
+    },
     {
       id: "skull",
       name: "Cranial bone",
@@ -595,11 +671,36 @@ input[type="range"]::-moz-range-thumb {
       color: "#4fd6c4",
       modes: [
         { f: 520, Q: 0.4, evidence: "phenomenological \u2014 cranial vault first mode region (literature ~500 Hz)" },
-        { f: 1200, Q: 0.35, evidence: "pending \u2014 cranial vault second mode region. Above slider max (900 Hz); reachable only via internal-driver harmonics or external song peaks once \xA75a lands" }
+        { f: 1200, Q: 0.35, evidence: "pending \u2014 cranial vault second mode region" },
+        { f: 2800, Q: 0.3, evidence: "pending \u2014 singer's formant cluster (~2.8 kHz); bone-conduction resonance contribution; commonly cited in voice science literature but specific skull values vary" }
       ]
     },
-    { id: "eyes", name: "Orbital cavities", nx: 0.56, ny: 0.26, r: 12, freq: 680, Q: 0.7, color: "#7ee0ff" },
-    { id: "ears", name: "Inner ear", nx: 0.42, ny: 0.26, r: 11, freq: 760, Q: 0.8, color: "#b48cff" }
+    {
+      id: "eyes",
+      name: "Orbital cavities",
+      nx: 0.56,
+      ny: 0.26,
+      r: 12,
+      freq: 680,
+      Q: 0.7,
+      color: "#7ee0ff",
+      modes: [
+        { f: 680, Q: 0.7, evidence: "phenomenological \u2014 small bony cavity behind the orbit; treated as a sharp narrow-band responder in the upper formant region. No specific literature citation pinned" }
+      ]
+    },
+    {
+      id: "ears",
+      name: "Inner ear",
+      nx: 0.42,
+      ny: 0.26,
+      r: 11,
+      freq: 760,
+      Q: 0.8,
+      color: "#b48cff",
+      modes: [
+        { f: 760, Q: 0.8, evidence: "phenomenological \u2014 proxy for outer ear / ear canal coupling. Real ear-canal first mode is closer to 3 kHz; this 760 Hz is a stylization to keep the zone in the slider range" }
+      ]
+    }
   ];
   var ZONE_IDS = zones.map((z) => z.id);
   var antiResonances = (() => {
@@ -856,6 +957,50 @@ input[type="range"]::-moz-range-thumb {
     ctx2.stroke();
     ctx2.restore();
   }
+  function drawBreathTrace(ctx2, W2, H2, breathEnv, mode, enabled, vt = 0, periodMs = 5e3) {
+    if (!enabled) return;
+    ctx2.save();
+    const bx = W2 * 0.04;
+    const by = H2 * 0.905;
+    const bw = W2 * 0.088;
+    const bh = H2 * 0.016;
+    if (mode === "sine") {
+      ctx2.strokeStyle = "rgba(120,160,180,0.18)";
+      ctx2.lineWidth = 1;
+      ctx2.beginPath();
+      for (let i = 0; i <= 64; i++) {
+        const px = bx + i / 64 * bw;
+        const py = by - Math.sin(i / 64 * Math.PI * 2) * bh;
+        if (i === 0) ctx2.moveTo(px, py);
+        else ctx2.lineTo(px, py);
+      }
+      ctx2.stroke();
+      const phaseRatio = vt % periodMs / periodMs;
+      const dotX = bx + phaseRatio * bw;
+      const dotY = by - Math.sin(phaseRatio * Math.PI * 2) * bh;
+      ctx2.fillStyle = "rgba(140,200,255,0.75)";
+      ctx2.shadowColor = "#8cc8ff";
+      ctx2.shadowBlur = 5;
+      ctx2.beginPath();
+      ctx2.arc(dotX, dotY, 2.5, 0, Math.PI * 2);
+      ctx2.fill();
+      ctx2.shadowBlur = 0;
+    } else {
+      ctx2.strokeStyle = "rgba(120,160,180,0.18)";
+      ctx2.lineWidth = 1;
+      ctx2.strokeRect(bx, by - bh, bw, bh * 2);
+      ctx2.fillStyle = "rgba(140,200,255,0.28)";
+      ctx2.fillRect(bx, by - bh, bw * breathEnv, bh * 2);
+    }
+    ctx2.font = "7px 'JetBrains Mono', monospace";
+    ctx2.fillStyle = "rgba(100,140,170,0.42)";
+    ctx2.fillText("BREATH", bx, by + bh + 8);
+    if (mode === "tap") {
+      ctx2.fillStyle = "rgba(140,200,255,0.55)";
+      ctx2.fillText("SPACE \xB7 hold=inhale", bx, by + bh + 17);
+    }
+    ctx2.restore();
+  }
   function drawVagus(ctx2, W2, H2, time, systemAmp, particles2, timeScale) {
     ctx2.save();
     ctx2.strokeStyle = `rgba(139,229,143,${0.18 + systemAmp * 0.35})`;
@@ -941,6 +1086,41 @@ input[type="range"]::-moz-range-thumb {
       ctx2.stroke();
     }
   }
+  function drawRegions(ctx2, W2, H2, zones2, amps) {
+    zones2.forEach((z, i) => {
+      const amp = amps[i];
+      if (amp < 0.08) return;
+      if (z.id === "skull") {
+        const cx = W2 * 0.5, cy = H2 * 0.205;
+        const rx = W2 * 0.085, ry = H2 * 0.115;
+        ctx2.save();
+        ctx2.beginPath();
+        ctx2.ellipse(cx, cy, rx * 1.9, ry * 1.9, 0, 0, Math.PI * 2);
+        const eg = ctx2.createRadialGradient(cx, cy, 0, cx, cy, Math.max(rx, ry) * 1.9);
+        eg.addColorStop(0, hexA(z.color, 0.22 * amp));
+        eg.addColorStop(0.55, hexA(z.color, 0.1 * amp));
+        eg.addColorStop(1, hexA(z.color, 0));
+        ctx2.fillStyle = eg;
+        ctx2.fill();
+        ctx2.restore();
+      } else if (z.id === "chest") {
+        ctx2.save();
+        ctx2.beginPath();
+        ctx2.moveTo(W2 * 0.36, H2 * 0.5);
+        ctx2.quadraticCurveTo(W2 * 0.32, H2 * 0.78, W2 * 0.4, H2 * 0.92);
+        ctx2.lineTo(W2 * 0.6, H2 * 0.92);
+        ctx2.quadraticCurveTo(W2 * 0.68, H2 * 0.78, W2 * 0.64, H2 * 0.5);
+        ctx2.closePath();
+        const eg = ctx2.createRadialGradient(W2 * 0.5, H2 * 0.71, 0, W2 * 0.5, H2 * 0.71, H2 * 0.22);
+        eg.addColorStop(0, hexA(z.color, 0.18 * amp));
+        eg.addColorStop(0.6, hexA(z.color, 0.07 * amp));
+        eg.addColorStop(1, hexA(z.color, 0));
+        ctx2.fillStyle = eg;
+        ctx2.fill();
+        ctx2.restore();
+      }
+    });
+  }
   function drawSystemAura(ctx2, W2, H2, systemAmp) {
     if (systemAmp < 0.35) return;
     const cx = W2 * 0.5, cy = H2 * 0.5;
@@ -994,7 +1174,7 @@ input[type="range"]::-moz-range-thumb {
     ctx2.textAlign = "left";
     const lx = mx + 24, ly = my - 4;
     ctx2.fillStyle = `rgba(200,170,255,${0.95 * strength})`;
-    ctx2.fillText("\u25CA ANTI-RESONANCE NODE", lx, ly);
+    ctx2.fillText("\u25CA SPECTRAL NULL", lx, ly);
     ctx2.fillStyle = `rgba(180,140,255,${0.65 * strength})`;
     ctx2.fillText(`${a.name.toUpperCase()} \u21CC ${b.name.toUpperCase()}`, lx, ly + 11);
     ctx2.fillText(`${ar.f.toFixed(0)} Hz \xB7 phase \u03C0`, lx, ly + 22);
@@ -1005,13 +1185,13 @@ input[type="range"]::-moz-range-thumb {
     ctx2.stroke();
     ctx2.restore();
   }
-  function updateBadge(sysAmp, activeCount, arActive) {
+  function updateBadge(sysAmp, activeCount, arActive, spatialNode = false) {
     const badge = document.getElementById("badge");
     const sysStateEl = document.getElementById("sysState");
     if (arActive && arActive.strength > 0.45) {
       const aName = arActive.ar.a.name.split(" ")[0].toUpperCase();
       const bName = arActive.ar.b.name.split(" ")[0].toUpperCase();
-      badge.textContent = `\u25CA ANTI-RESONANCE \xB7 ${aName} \u21CC ${bName}`;
+      badge.textContent = `\u25CA SPECTRAL NULL \xB7 ${aName} \u21CC ${bName}`;
       badge.className = "resonance-badge anti";
       sysStateEl.textContent = "PHASE CANCELLATION";
       sysStateEl.style.color = "#b48cff";
@@ -1020,6 +1200,11 @@ input[type="range"]::-moz-range-thumb {
       badge.className = "resonance-badge full";
       sysStateEl.textContent = "FULL HARMONIC LOCK";
       sysStateEl.style.color = "#ffe07a";
+    } else if (spatialNode) {
+      badge.textContent = "\u25CA SPATIAL NODE";
+      badge.className = "resonance-badge spatial";
+      sysStateEl.textContent = "FIELD CANCELLATION";
+      sysStateEl.style.color = "#8cc8ff";
     } else if (sysAmp > 0.35 || activeCount >= 3) {
       badge.textContent = "HARMONIC COUPLING";
       badge.className = "resonance-badge high";
@@ -1453,6 +1638,7 @@ input[type="range"]::-moz-range-thumb {
     toggleBtn.addEventListener("click", () => {
       const next = !breath2.enabled;
       breath2.setEnabled(next);
+      state2.breathEnabled = next;
       toggleBtn.classList.toggle("on", next);
     });
     modeBtn.addEventListener("click", () => {
@@ -1563,8 +1749,8 @@ input[type="range"]::-moz-range-thumb {
     const threshold = 0.55 * field.maxA;
     ctx2.save();
     ctx2.beginPath();
-    ctx2.ellipse(W2 * 0.5, H2 * 0.21, W2 * 0.1, H2 * 0.15, 0, 0, TWO_PI);
-    ctx2.ellipse(W2 * 0.5, H2 * 0.7, W2 * 0.17, H2 * 0.27, 0, 0, TWO_PI);
+    ctx2.ellipse(W2 * 0.5, H2 * 0.205, W2 * 0.085, H2 * 0.115, 0, 0, TWO_PI);
+    ctx2.ellipse(W2 * 0.5, H2 * 0.71, W2 * 0.14, H2 * 0.21, 0, 0, TWO_PI);
     ctx2.clip();
     ctx2.globalCompositeOperation = "lighter";
     for (let gy = 0; gy < GRID_H; gy++) {
@@ -1839,6 +2025,25 @@ input[type="range"]::-moz-range-thumb {
   };
 
   // src/articulation.js
+  var SEEDED_OPENINGS = {
+    items: [
+      {
+        recognition: "Zone frequencies are phenomenological \u2014 hand-tuned to feel right, not measured from bodies.",
+        opening: "No session has tested whether these thresholds match a different vocal range.",
+        warrant: "speculative"
+      },
+      {
+        recognition: "Whole-system resonance fires at sysAmp > 0.55 with 5+ zones active (acoustic model threshold).",
+        opening: "Whether users actually feel something different at this threshold has not been tested (AIN-RS-003).",
+        warrant: "mathematical"
+      },
+      {
+        recognition: "Coupling between zones follows a hand-set anatomical adjacency graph.",
+        opening: "Edge weights are subjective \u2014 no session data has been used to calibrate them yet.",
+        warrant: "speculative"
+      }
+    ]
+  };
   var cache = null;
   var loadAttempted = false;
   async function loadArticulation(url = "articulation.json") {
@@ -1846,22 +2051,91 @@ input[type="range"]::-moz-range-thumb {
     loadAttempted = true;
     try {
       const res = await fetch(url, { cache: "no-store" });
-      if (!res.ok) return null;
+      if (!res.ok) {
+        cache = SEEDED_OPENINGS;
+        return cache;
+      }
       cache = await res.json();
       return cache;
     } catch {
-      return null;
+      cache = SEEDED_OPENINGS;
+      return cache;
     }
   }
   function articulationHint(doc, sysAmp, activeCount) {
     if (!doc?.items?.length) return null;
-    const item = doc.items[0];
+    const idx = Math.floor(sysAmp * doc.items.length) % doc.items.length;
+    const item = doc.items[idx];
     const parts = [];
     if (item.recognition) parts.push(item.recognition);
     if (item.opening) parts.push(`Open: ${item.opening}`);
     if (item.warrant) parts.push(`(${item.warrant})`);
     return parts.join(" \xB7 ") || null;
   }
+
+  // src/notices.js
+  var SUSTAINED_MS = 3e3;
+  var DISPLAY_MS = 6e3;
+  var COOLDOWN_MS = 15e3;
+  var NoticeEngine = class {
+    constructor() {
+      this._states = {};
+      this._current = null;
+    }
+    /**
+     * Call once per frame (or throttled to ~4 Hz).
+     * @param {object} s
+     *   s.realT        — real wall-clock ms (Date.now())
+     *   s.sysAmp       — 0..1
+     *   s.activeCount  — integer
+     *   s.arActive     — same shape as activeAntiResonance() return, or null
+     *   s.spatialNode  — boolean
+     * @returns {string|null} — text to show, or null
+     */
+    tick(s) {
+      const now = s.realT;
+      const active = this._activeKey(s);
+      if (active) {
+        if (!this._states[active]) {
+          this._states[active] = { enteredAt: now, firedAt: 0 };
+        }
+        const st = this._states[active];
+        const dwell = now - st.enteredAt;
+        const since = now - st.firedAt;
+        if (dwell >= SUSTAINED_MS && since >= COOLDOWN_MS) {
+          st.firedAt = now;
+          this._current = { text: this._textFor(s, active), shownAt: now };
+        }
+      } else {
+        this._states = {};
+      }
+      if (this._current) {
+        if (now - this._current.shownAt < DISPLAY_MS) return this._current.text;
+        this._current = null;
+      }
+      return null;
+    }
+    _activeKey(s) {
+      if (s.arActive && s.arActive.strength > 0.45) return `null_${s.arActive.ar.f | 0}`;
+      if (s.sysAmp > 0.55 && s.activeCount >= 5) return "whole_system";
+      if (s.spatialNode) return "spatial_node";
+      return null;
+    }
+    _textFor(s, key) {
+      if (key === "whole_system") {
+        return `Whole-system resonance sustained \u2014 ${s.activeCount} zones in simultaneous harmonic response.`;
+      }
+      if (key === "spatial_node") {
+        return "Zone at interference cancellation node \u2014 external source nulling internal response at this position.";
+      }
+      if (key.startsWith("null_")) {
+        const a = s.arActive.ar.a.name.split(" ")[0];
+        const b = s.arActive.ar.b.name.split(" ")[0];
+        return `Spectral null sustained \u2014 drive is between the natural modes of ${a} and ${b}.`;
+      }
+      return null;
+    }
+  };
 
   // src/main.js
   var canvas = document.getElementById("c");
@@ -1919,6 +2193,7 @@ input[type="range"]::-moz-range-thumb {
   loadArticulation().then((doc) => {
     state.articulationDoc = doc;
   });
+  var notices = new NoticeEngine();
   function frame(now) {
     const dt = state.lastT ? now - state.lastT : 16;
     state.lastT = now;
@@ -1954,13 +2229,15 @@ input[type="range"]::-moz-range-thumb {
     const hasInterference = state.externalDrivers.length > 0;
     const field = state.fieldEnabled && hasInterference ? computeField(state.drivers[0], state.externalDrivers, state.vt) : null;
     const pf = primaryF(state.drivers);
+    let spatialNodeActive = false;
     const target = zones.map((z) => {
       let t = zoneResponse(z, allDrivers);
       t = applyViewScale(z, t, state.viewMode);
-      if (field) {
-        const s = Math.abs(sampleField(field, z.nx, z.ny));
-        const fieldGain = Math.min(0.35, s * 0.2);
-        t = Math.min(1, t * (1 + fieldGain));
+      if (field && field.maxA > 0.04) {
+        const sNorm = Math.abs(sampleField(field, z.nx, z.ny)) / field.maxA;
+        const mod = 0.65 + 0.7 * sNorm;
+        if (t > 0.4 && sNorm < 0.25) spatialNodeActive = true;
+        t = Math.min(1, t * mod);
       }
       return t;
     });
@@ -1979,6 +2256,7 @@ input[type="range"]::-moz-range-thumb {
     drawSilhouette(ctx, W, H, breathEnv);
     drawSystemAura(ctx, W, H, sysAmp * (0.6 + 0.4 * breathEnv));
     if (field) drawField(ctx, W, H, field);
+    drawRegions(ctx, W, H, zones, amps);
     const vagusGain = 0.35 + 0.65 * breathEnv;
     drawVagus(ctx, W, H, state.vt, sysAmp, particles, state.timeScale * vagusGain);
     zones.forEach((z, i) => drawZone(ctx, W, H, z, amps[i], pf, state.vt));
@@ -1986,11 +2264,15 @@ input[type="range"]::-moz-range-thumb {
       drawAntiResonance(ctx, W, H, arActive.ar, arActive.strength, state.vt);
     }
     drawVocalFolds(ctx, W, H, pf, state.vt);
+    drawBreathTrace(ctx, W, H, breathEnv, breath.mode, state.breathEnabled, state.vt, breath.periodMs);
     updateZoneBars(rowEls, amps);
-    updateBadge(sysAmp, activeCount, arActive);
+    updateBadge(sysAmp, activeCount, arActive, spatialNodeActive);
     const badge = document.getElementById("badge");
     const hint = articulationHint(state.articulationDoc, sysAmp, activeCount);
     if (hint) badge.title = hint;
+    const noticeText = notices.tick({ realT: Date.now(), sysAmp, activeCount, arActive, spatialNode: spatialNodeActive });
+    const noticeEl = document.getElementById("notice");
+    if (noticeEl) noticeEl.textContent = noticeText || "";
     const externalFs = state.externalDrivers.map((d) => d.f);
     state.sessionRecorder.sample(sysAmp, activeCount, arActive, pf, amps, externalFs);
     ui.updateBreathDisplay(state.vt);

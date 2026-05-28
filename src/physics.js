@@ -31,6 +31,14 @@
 // Additional `modes[]` entries respond independently to drivers
 // (zoneResponse sums per-driver contributions across modes).
 
+// AIN-RS-001 discipline (extended 2026-05-28): every zone — single- or multi-modal
+// — carries an `evidence` field on each mode declaring whether the frequency is
+// `cited` (literature URL/DOI), `pending` (range known, source not yet pinned),
+// or `phenomenological` (hand-tuned, flagged for citation hunting). Single-mode
+// zones now expose a 1-element `modes` array so the discipline is uniform across
+// all zones; `zoneResponse` already handled both shapes transparently. The
+// top-level `freq`/`Q` is preserved for anti-resonance pair geometry, envelope
+// tau, and visual rendering — they read mode[0] semantics by construction.
 export const zones = [
   { id: 'chest',    name: 'Chest cavity',    nx: 0.50, ny: 0.78, r: 90,  freq: 120, Q: 0.35, color: '#ff7a3c',
     modes: [
@@ -40,20 +48,52 @@ export const zones = [
   },
   { id: 'heart',    name: 'Heart',           nx: 0.45, ny: 0.69, r: 30,  freq: 105, Q: 0.28, color: '#ff4d6d',
     note: 'Tracks the low-frequency tissue vibration felt NEAR the heart (anterior thoracic wall), not heart-muscle resonance. The heart pumps; it does not acoustically resonate at vocal frequencies.',
+    modes: [
+      { f: 105, Q: 0.28, evidence: 'phenomenological — felt low-frequency vibration in the anterior thoracic wall near the heart; not heart-muscle resonance' },
+    ],
   },
-  { id: 'tracheal', name: 'Tracheal column', nx: 0.50, ny: 0.62, r: 24,  freq: 180, Q: 0.45, color: '#ff9550' },
-  { id: 'larynx',   name: 'Larynx · folds',  nx: 0.50, ny: 0.52, r: 18,  freq: 220, Q: 0.20, color: '#ffc14a', isDriver: true },
-  { id: 'pharynx',  name: 'Pharynx',         nx: 0.50, ny: 0.45, r: 26,  freq: 300, Q: 0.50, color: '#ffe07a' },
-  { id: 'mouth',    name: 'Oral cavity',      nx: 0.56, ny: 0.36, r: 32,  freq: 420, Q: 0.55, color: '#8be58f' },
-  { id: 'nasal',    name: 'Nasal / sinuses',  nx: 0.51, ny: 0.30, r: 24,  freq: 580, Q: 0.60, color: '#6ad7ff' },
+  { id: 'tracheal', name: 'Tracheal column', nx: 0.50, ny: 0.62, r: 24,  freq: 180, Q: 0.45, color: '#ff9550',
+    modes: [
+      { f: 180, Q: 0.45, evidence: 'phenomenological — open-tube first mode of the adult trachea (literature ranges roughly 150–250 Hz depending on length and termination)' },
+    ],
+  },
+  { id: 'larynx',   name: 'Larynx · folds',  nx: 0.50, ny: 0.52, r: 18,  freq: 220, Q: 0.20, color: '#ffc14a', isDriver: true,
+    modes: [
+      { f: 220, Q: 0.20, evidence: 'phenomenological — chosen as the comfortable adult phonation fundamental (≈A3); the larynx is the *driver* in this model, not a passive resonator, so Q is intentionally broad' },
+    ],
+  },
+  { id: 'pharynx',  name: 'Pharynx',         nx: 0.50, ny: 0.45, r: 26,  freq: 300, Q: 0.50, color: '#ffe07a',
+    modes: [
+      { f: 300, Q: 0.50, evidence: 'phenomenological — pharyngeal F1 region; published Story/Titze vocal-tract data places it in the 250–400 Hz range depending on vowel shape' },
+    ],
+  },
+  { id: 'mouth',    name: 'Oral cavity',      nx: 0.56, ny: 0.36, r: 32,  freq: 420, Q: 0.55, color: '#8be58f',
+    modes: [
+      { f: 420, Q: 0.55, evidence: 'phenomenological — oral F2 region for open vowels; literature ranges 400–800 Hz depending on tongue position' },
+    ],
+  },
+  { id: 'nasal',    name: 'Nasal / sinuses',  nx: 0.51, ny: 0.30, r: 24,  freq: 580, Q: 0.60, color: '#6ad7ff',
+    modes: [
+      { f: 580, Q: 0.60, evidence: 'phenomenological — paranasal Helmholtz region; maxillary sinus measurements place a primary mode near 500–800 Hz with substantial individual variation' },
+    ],
+  },
   { id: 'skull',    name: 'Cranial bone',     nx: 0.50, ny: 0.20, r: 65,  freq: 520, Q: 0.40, color: '#4fd6c4',
     modes: [
       { f: 520,  Q: 0.40, evidence: 'phenomenological — cranial vault first mode region (literature ~500 Hz)' },
-      { f: 1200, Q: 0.35, evidence: 'pending — cranial vault second mode region. Above slider max (900 Hz); reachable only via internal-driver harmonics or external song peaks once §5a lands' },
+      { f: 1200, Q: 0.35, evidence: 'pending — cranial vault second mode region' },
+      { f: 2800, Q: 0.30, evidence: "pending — singer's formant cluster (~2.8 kHz); bone-conduction resonance contribution; commonly cited in voice science literature but specific skull values vary" },
     ],
   },
-  { id: 'eyes',     name: 'Orbital cavities', nx: 0.56, ny: 0.26, r: 12,  freq: 680, Q: 0.70, color: '#7ee0ff' },
-  { id: 'ears',     name: 'Inner ear',        nx: 0.42, ny: 0.26, r: 11,  freq: 760, Q: 0.80, color: '#b48cff' },
+  { id: 'eyes',     name: 'Orbital cavities', nx: 0.56, ny: 0.26, r: 12,  freq: 680, Q: 0.70, color: '#7ee0ff',
+    modes: [
+      { f: 680, Q: 0.70, evidence: 'phenomenological — small bony cavity behind the orbit; treated as a sharp narrow-band responder in the upper formant region. No specific literature citation pinned' },
+    ],
+  },
+  { id: 'ears',     name: 'Inner ear',        nx: 0.42, ny: 0.26, r: 11,  freq: 760, Q: 0.80, color: '#b48cff',
+    modes: [
+      { f: 760, Q: 0.80, evidence: 'phenomenological — proxy for outer ear / ear canal coupling. Real ear-canal first mode is closer to 3 kHz; this 760 Hz is a stylization to keep the zone in the slider range' },
+    ],
+  },
 ];
 
 /** Canonical zone ids for session export / graph ingest (amps[] index order). */

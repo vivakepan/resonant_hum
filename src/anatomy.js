@@ -178,6 +178,58 @@ export function drawVocalFolds(ctx, W, H, driveF, time) {
 }
 
 
+// ─── Breath phase trace (§5b) ─────────────────────────────────
+// Lower-left corner micro-indicator. Sine mode shows a full cycle as a dim
+// path with a moving dot at the current phase; tap/mic modes show a level bar.
+// Tap mode adds a SPACE hint so the user knows the keyboard gesture.
+
+export function drawBreathTrace(ctx, W, H, breathEnv, mode, enabled, vt = 0, periodMs = 5000) {
+  if (!enabled) return;
+  ctx.save();
+  const bx = W * 0.04;
+  const by = H * 0.905;
+  const bw = W * 0.088;
+  const bh = H * 0.016;
+
+  if (mode === 'sine') {
+    ctx.strokeStyle = 'rgba(120,160,180,0.18)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let i = 0; i <= 64; i++) {
+      const px = bx + (i / 64) * bw;
+      const py = by - Math.sin((i / 64) * Math.PI * 2) * bh;
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+    const phaseRatio = (vt % periodMs) / periodMs;
+    const dotX = bx + phaseRatio * bw;
+    const dotY = by - Math.sin(phaseRatio * Math.PI * 2) * bh;
+    ctx.fillStyle = 'rgba(140,200,255,0.75)';
+    ctx.shadowColor = '#8cc8ff';
+    ctx.shadowBlur = 5;
+    ctx.beginPath();
+    ctx.arc(dotX, dotY, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  } else {
+    ctx.strokeStyle = 'rgba(120,160,180,0.18)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(bx, by - bh, bw, bh * 2);
+    ctx.fillStyle = 'rgba(140,200,255,0.28)';
+    ctx.fillRect(bx, by - bh, bw * breathEnv, bh * 2);
+  }
+
+  ctx.font = "7px 'JetBrains Mono', monospace";
+  ctx.fillStyle = 'rgba(100,140,170,0.42)';
+  ctx.fillText('BREATH', bx, by + bh + 8);
+  if (mode === 'tap') {
+    ctx.fillStyle = 'rgba(140,200,255,0.55)';
+    ctx.fillText('SPACE · hold=inhale', bx, by + bh + 17);
+  }
+  ctx.restore();
+}
+
+
 // ─── Vagus nerve + traveling particles ─────────────────────────
 
 export function drawVagus(ctx, W, H, time, systemAmp, particles, timeScale) {

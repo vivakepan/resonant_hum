@@ -135,11 +135,14 @@ export function drawField(ctx, W, H, field) {
   const threshold = 0.55 * field.maxA;
 
   ctx.save();
-  // Soft body region as clip — head ellipse + chest ellipse. Approximate;
-  // matches the silhouette stroke regions in anatomy.js drawSilhouette.
+  // Body-region clip — head ellipse matches anatomy.js skull stroke exactly
+  // (rx W*0.085, ry H*0.115); chest ellipse tightened to the bezier boundary
+  // (widest ~0.14W each side of centre, half-height ~0.21H, centred ~y 0.71).
+  // Previous oversized values (W*0.10/H*0.15 head, W*0.17/H*0.27 chest) let
+  // the field bleed ~18-30% outside the visible silhouette.
   ctx.beginPath();
-  ctx.ellipse(W * 0.50, H * 0.21, W * 0.10, H * 0.15, 0, 0, TWO_PI);
-  ctx.ellipse(W * 0.50, H * 0.70, W * 0.17, H * 0.27, 0, 0, TWO_PI);
+  ctx.ellipse(W * 0.50, H * 0.205, W * 0.085, H * 0.115, 0, 0, TWO_PI);
+  ctx.ellipse(W * 0.50, H * 0.710, W * 0.140, H * 0.210, 0, 0, TWO_PI);
   ctx.clip();
 
   ctx.globalCompositeOperation = 'lighter';

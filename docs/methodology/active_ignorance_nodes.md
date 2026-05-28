@@ -10,12 +10,13 @@ Status legend: **ACTIVE** · **PARTIALLY RESOLVED** · **RESOLVED** · **DEFERRE
 
 ## AIN-RS-001 — Zone natural frequencies are unverified against bodies
 
-- **Status:** ACTIVE
+- **Status:** PARTIALLY RESOLVED (evidence-field discipline now uniform across all zones; citations remain pending)
 - **Where:** [src/physics.js](../../src/physics.js) zone definitions
 - **Description:** Frequencies (chest 120 Hz, larynx 220 Hz, skull 520 Hz, etc.) are hand-tuned to feel right and produce legible visuals. No MRI-derived formant data or published vocal-tract resonance measurements are cited per zone.
 - **Blast radius:** Everything downstream — coupling, anti-resonance notches, badge thresholds — treats these as ground truth.
-- **Resolution direction:** Mark each zone's frequency as **hypothesis with prediction** and use upcoming song-upload feature to test whether common vocal placements produce expected zone activations. Add an `evidence` field to each zone declaring "tuned by ear" vs. "matches published formant range."
-- **Partial resolution:** Multi-modal cavity zones (§12.6) will cite published vocal-acoustics literature for each mode frequency — turns AIN-RS-001 from a single gap into a citation discipline (AIN-RS-012).
+- **Resolution direction:** Mark each zone's frequency as **hypothesis with prediction** and use upcoming song-upload feature to test whether common vocal placements produce expected zone activations.
+- **Partial resolution (2026-05-28):** Every zone now carries a `modes: [{ f, Q, evidence }]` array. Single-mode zones were upgraded to the same 1-element array shape as multi-modal ones, so the AIN-RS-012 `evidence` discipline is now **uniform** — every frequency in the system has an explicit `evidence` value declaring `phenomenological` (hand-tuned), `pending` (literature range known, source not pinned), or `cited` (DOI/URL). The tool for catching regressions exists. The open work is promoting `phenomenological` → `pending` or `cited` via literature review at quarterly cadence.
+- **Remaining gap (still AIN-RS-012):** No new mode frequency added after 2026-05-28 has a `cited` evidence value yet. Quarterly review of `modes[].evidence` values is the active obligation.
 
 ## AIN-RS-002 — Coupling kernel choice is arbitrary
 
@@ -36,7 +37,7 @@ Status legend: **ACTIVE** · **PARTIALLY RESOLVED** · **RESOLVED** · **DEFERRE
 ## AIN-RS-004 — Two distinct anti-resonance phenomena are conflated
 
 - **Status:** PARTIALLY RESOLVED
-- **Where:** [src/renderer.js](../../src/renderer.js), [src/field.js](../../src/field.js), [GLOSSARY.md](../GLOSSARY.md)
+- **Where:** [src/renderer.js](../../src/renderer.js), [src/field.js](../../src/field.js); discipline registered in [README.md §3 AIN-RS-004](../../README.md)
 - **Description:** **(α) Spectral null** — geometric-mean notches (◊ presets). **(β) Spatial node** — field cancellation when song + internal active.
 - **Resolution:** Field shipped (β). Docs distinguish terms; badge label may still say "ANTI-RESONANCE" for α only.
 
